@@ -339,6 +339,44 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
+.dashboard-stats-grid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 1200px) {
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.icon-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  margin-right: var(--space-sm);
+}
+.icon-chip.primary {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+.icon-chip.success {
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+}
+.icon-chip.warning {
+  background: var(--color-warning-subtle);
+  color: var(--color-warning);
+}
+.icon-chip.danger {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
+}
+
 /* ── Button System ── */
 .btn {
   display: inline-flex;

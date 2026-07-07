@@ -83,6 +83,10 @@ function DashboardPage({ onNavigate }) {
     tpsValue >= 18 ? 'var(--color-success)' :
     tpsValue >= 15 ? 'var(--color-warning)' : 'var(--color-danger)'
 
+  const tpsIconClass = tpsValue === null ? '' :
+    tpsValue >= 18 ? 'success' :
+    tpsValue >= 15 ? 'warning' : 'danger'
+
   const chartTooltipStyle = {
     backgroundColor: 'var(--bg-elevated)',
     border: '1px solid var(--border-subtle)',
@@ -111,9 +115,9 @@ function DashboardPage({ onNavigate }) {
         </div>
       </div>
 
-      <div className="card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+      <div className="dashboard-stats-grid">
         {/* Server Status Card */}
-        <div className={`card glass-card ${isOnline ? 'glow-pulse-online' : 'glow-pulse-offline'}`}>
+        <div className={`card ${isOnline ? 'glow-pulse-online' : 'glow-pulse-offline'}`}>
           <div className="card-header">
             <span className="card-title">Server Status</span>
             <StatusBadge status={status} />
@@ -123,13 +127,13 @@ function DashboardPage({ onNavigate }) {
         </div>
 
         {/* Players Card */}
-        <div className={`card glass-card ${isOnline && players.online > 0 ? 'glow-success' : ''}`}>
+        <div className={`card ${isOnline && players.online > 0 ? 'glow-success' : ''}`}>
           <div className="card-header">
-            <span className="card-title"><Users size={16} style={{ marginRight: 8, color: 'var(--color-primary)' }} />Players</span>
+            <span className="card-title"><div className="icon-chip primary"><Users size={16} /></div>Players</span>
           </div>
-          <div className="card-value">{players.online}<span style={{ fontSize: 16, color: 'var(--text-tertiary)' }}>/{players.max || 20}</span></div>
+          <div className="card-value">{players.online}<span style={{ fontSize: 'var(--font-lg)', color: 'var(--text-tertiary)' }}>/{players.max || 20}</span></div>
           {players.list.length > 0 ? (
-            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ marginTop: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
               {players.list.slice(0, 5).map(p => (
                 <div key={p.uuid || p.name} className="player-item" style={{ background: 'var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '6px 10px' }}>
                   <img
@@ -143,18 +147,18 @@ function DashboardPage({ onNavigate }) {
               ))}
             </div>
           ) : (
-            <p className="card-subtitle" style={{ marginTop: 8 }}>No players online</p>
+            <p className="card-subtitle" style={{ marginTop: 'var(--space-sm)' }}>No players online</p>
           )}
         </div>
 
         {/* RAM Usage Card */}
-        <div className="card glass-card">
+        <div className="card">
           <div className="card-header">
-            <span className="card-title"><MemoryStick size={16} style={{ marginRight: 8, color: 'var(--color-primary)' }} />RAM Usage</span>
+            <span className="card-title"><div className="icon-chip primary"><MemoryStick size={16} /></div>RAM Usage</span>
           </div>
-          <div className="card-value">{currentRam.used}<span style={{ fontSize: 14, color: 'var(--text-tertiary)' }}> MB</span></div>
-          <div className="chart-container" style={{ marginTop: 12 }}>
-            <ResponsiveContainer width="100%" height={120}>
+          <div className="card-value">{currentRam.used}<span style={{ fontSize: 'var(--font-base)', color: 'var(--text-tertiary)' }}> MB</span></div>
+          <div className="chart-container" style={{ marginTop: 'auto', paddingTop: 'var(--space-md)' }}>
+            <ResponsiveContainer width="100%" height={80}>
               <AreaChart data={ramHistory}>
                 <defs>
                   <linearGradient id="ramGradient" x1="0" y1="0" x2="0" y2="1">
@@ -162,7 +166,6 @@ function DashboardPage({ onNavigate }) {
                     <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
                 <XAxis dataKey="time" hide />
                 <YAxis hide />
                 <Tooltip contentStyle={chartTooltipStyle} className="custom-chart-tooltip" formatter={(v) => [`${v} MB`, 'RAM']} />
@@ -173,13 +176,13 @@ function DashboardPage({ onNavigate }) {
         </div>
 
         {/* CPU Usage Card */}
-        <div className="card glass-card">
+        <div className="card">
           <div className="card-header">
-            <span className="card-title"><Cpu size={16} style={{ marginRight: 8, color: 'var(--color-success)' }} />CPU Usage</span>
+            <span className="card-title"><div className="icon-chip success"><Cpu size={16} /></div>CPU Usage</span>
           </div>
-          <div className="card-value">{currentCpu}<span style={{ fontSize: 14, color: 'var(--text-tertiary)' }}>%</span></div>
-          <div className="chart-container" style={{ marginTop: 12 }}>
-            <ResponsiveContainer width="100%" height={120}>
+          <div className="card-value">{currentCpu}<span style={{ fontSize: 'var(--font-base)', color: 'var(--text-tertiary)' }}>%</span></div>
+          <div className="chart-container" style={{ marginTop: 'auto', paddingTop: 'var(--space-md)' }}>
+            <ResponsiveContainer width="100%" height={80}>
               <AreaChart data={cpuHistory}>
                 <defs>
                   <linearGradient id="cpuGradient" x1="0" y1="0" x2="0" y2="1">
@@ -187,7 +190,6 @@ function DashboardPage({ onNavigate }) {
                     <stop offset="95%" stopColor="var(--color-success)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
                 <XAxis dataKey="time" hide />
                 <YAxis hide domain={[0, 100]} />
                 <Tooltip contentStyle={chartTooltipStyle} className="custom-chart-tooltip" formatter={(v) => [`${v}%`, 'CPU']} />
@@ -199,10 +201,10 @@ function DashboardPage({ onNavigate }) {
       </div>
 
       {/* Bottom Row: TPS + Quick Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2.5fr', gap: 16, marginTop: 16 }}>
-        <div className={`card glass-card ${isOnline && tpsValue >= 18 ? 'glow-success' : isOnline && tpsValue >= 15 ? 'glow-warning' : isOnline ? 'glow-danger' : ''}`}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2.5fr', gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
+        <div className={`card ${isOnline && tpsValue >= 18 ? 'glow-success' : isOnline && tpsValue >= 15 ? 'glow-warning' : isOnline ? 'glow-danger' : ''}`}>
           <div className="card-header">
-            <span className="card-title"><Activity size={16} style={{ marginRight: 8, color: tpsColor }} />TPS</span>
+            <span className="card-title"><div className={`icon-chip ${tpsIconClass}`.trim()}><Activity size={16} /></div>TPS</span>
           </div>
           <div className="card-value" style={{ color: tpsColor }}>
             {tpsValue !== null ? tpsValue.toFixed(1) : 'N/A'}
@@ -212,11 +214,11 @@ function DashboardPage({ onNavigate }) {
           </p>
         </div>
 
-        <div className="card glass-card">
+        <div className="card">
           <div className="card-header">
             <span className="card-title">Quick Actions</span>
           </div>
-          <div className="flex gap-sm" style={{ flexWrap: 'wrap', marginTop: 8 }}>
+          <div className="flex gap-sm" style={{ flexWrap: 'wrap', marginTop: 'var(--space-sm)' }}>
             <button className="btn btn-outline btn-premium" onClick={handleRestart} disabled={!isOnline}>
               <RotateCcw size={16} /> Restart Server
             </button>
