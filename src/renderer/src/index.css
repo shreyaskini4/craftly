@@ -425,14 +425,14 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #3ca324 0%, #2b761a 100%);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
-  box-shadow: 0 0 14px rgba(59, 130, 246, 0.45);
+  background: linear-gradient(135deg, #45c12a 0%, #328f1e 100%);
+  box-shadow: 0 0 14px rgba(60, 163, 36, 0.45);
 }
 
 .btn-success {
@@ -1715,7 +1715,7 @@ body {
   --border: #d0d7de;
   --border-hover: #afb8c1;
   
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
-  --accent-subtle: rgba(59, 130, 246, 0.1);
+  --accent: #9333ea;
+  --accent-hover: #a855f7;
+  --accent-subtle: rgba(147, 51, 234, 0.1);
 }

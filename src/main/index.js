@@ -17,10 +17,10 @@ function createWindow() {
     height: 800,
     minWidth: 1024,
     minHeight: 700,
-    backgroundColor: '#0d1117',
+    backgroundColor: '#111111',
     titleBarStyle: 'hidden',
     titleBarOverlay: {
-      color: '#0d1117',
+      color: '#111111',
       symbolColor: '#8b949e',
       height: 36
     },

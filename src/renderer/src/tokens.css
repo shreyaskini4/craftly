@@ -9,6 +9,10 @@
   --bg-surface: #222222;
   --bg-elevated: #2a2a2a;
   
+  --bg-primary: var(--bg-app);
+  --bg-secondary: var(--bg-panel);
+  --bg-tertiary: var(--bg-surface);
+  
   /* ── Glass Colors (Strict Scale) ── */
   --glass-bg-heavy: rgba(13, 17, 23, 0.7);
   --glass-bg-medium: rgba(22, 27, 34, 0.45);
