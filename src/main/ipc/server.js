@@ -10,10 +10,11 @@ export function registerServerIpc(mainWindow) {
   ipcMain.handle('server:start', async () => {
     const settings = settingsStore.getAll()
     const serverDir = settings.serverDir
-    const jarPath = path.join(serverDir, 'server.jar')
+    const jarName = settings.serverJar || 'server.jar'
+    const jarPath = path.join(serverDir, jarName)
 
     if (!fs.existsSync(jarPath)) {
-      throw new Error('Server jar not found. Please download a server version first in Settings.')
+      throw new Error(`Server jar (${jarName}) not found. Please download a server version first in Settings or import a valid server directory.`)
     }
 
     const config = {

@@ -1,4 +1,6 @@
 import { ipcMain, dialog } from 'electron'
+import fs from 'fs'
+import path from 'path'
 import settingsStore from '../services/settingsStore.js'
 import { detectJava, validateJavaPath } from '../utils/javaDetector.js'
 
@@ -41,6 +43,19 @@ export function registerSettingsIpc(mainWindow) {
     if (!result.canceled && result.filePaths.length > 0) {
       const dir = result.filePaths[0]
       settingsStore.set('serverDir', dir)
+      
+      try {
+        const files = fs.readdirSync(dir)
+        const jarFiles = files.filter(f => f.endsWith('.jar'))
+        if (jarFiles.length > 0) {
+          let selectedJar = jarFiles.find(f => f === 'server.jar' || f.includes('paper') || f.includes('forge') || f.includes('fabric'))
+          if (!selectedJar) selectedJar = jarFiles[0]
+          settingsStore.set('serverJar', selectedJar)
+        }
+      } catch (err) {
+        console.error('Failed to scan for jar files:', err)
+      }
+      
       return dir
     }
     return null

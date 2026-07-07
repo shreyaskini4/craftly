@@ -49,6 +49,7 @@ export function registerVersionsIpc(mainWindow) {
     // Save version info to settings
     settingsStore.set('serverType', type)
     settingsStore.set('serverVersion', version)
+    settingsStore.set('serverJar', 'server.jar')
     if (build) settingsStore.set('serverBuild', String(build))
 
     // Auto-accept EULA
