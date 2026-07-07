@@ -46,7 +46,8 @@ contextBridge.exposeInMainWorld('api', {
     get: () => ipcRenderer.invoke('settings:get'),
     set: (key, value) => ipcRenderer.invoke('settings:set', key, value),
     browseJava: () => ipcRenderer.invoke('settings:browse-java'),
-    browseDir: () => ipcRenderer.invoke('settings:browse-dir'),
+    scanDir: () => ipcRenderer.invoke('settings:browse-dir'),
+    importServer: (data) => ipcRenderer.invoke('settings:import-server', data),
     detectJava: () => ipcRenderer.invoke('settings:detect-java')
   },
 

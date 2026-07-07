@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import useServerStore from '../stores/serverStore'
 import useMonitorStore from '../stores/monitorStore'
 import StatusBadge from '../components/common/StatusBadge'
+import ImportServerModal from '../components/common/ImportServerModal'
 
 function formatUptime(ms) {
   if (!ms || ms <= 0) return '00:00:00'
@@ -20,6 +21,31 @@ function DashboardPage({ onNavigate }) {
   const { cpuHistory, ramHistory, currentCpu, currentRam, players, tps } = useMonitorStore()
   const initMonitorListeners = useMonitorStore(state => state.initListeners)
   const [uptime, setUptime] = useState(0)
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
+  const [serverDir, setServerDir] = useState(null)
+  const [loadingSettings, setLoadingSettings] = useState(true)
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const s = await window.api.settings.get()
+        setServerDir(s.serverDir)
+      } catch(e) {
+        console.error(e)
+      }
+      setLoadingSettings(false)
+    }
+    fetchSettings()
+  }, [])
+
+  const handleImportSuccess = async () => {
+    try {
+      const s = await window.api.settings.get()
+      setServerDir(s.serverDir)
+    } catch(e) {
+      console.error(e)
+    }
+  }
 
   useEffect(() => {
     initMonitorListeners()
@@ -93,6 +119,43 @@ function DashboardPage({ onNavigate }) {
     borderRadius: 'var(--radius-md)',
     fontSize: 'var(--font-xs)',
     color: 'var(--text-primary)'
+  }
+
+  if (loadingSettings) {
+    return (
+      <div className="slide-up">
+        <div className="empty-state">
+          <div className="loading-spinner" style={{ margin: '0 auto' }} />
+        </div>
+      </div>
+    )
+  }
+
+  if (!serverDir) {
+    return (
+      <div className="slide-up">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Dashboard</h1>
+            <p className="page-subtitle">Monitor your Minecraft server at a glance</p>
+          </div>
+        </div>
+        <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '50vh', gap: 'var(--space-md)' }}>
+          <div style={{ textAlign: 'center' }}>
+            <h2 style={{ marginBottom: 'var(--space-xs)' }}>No Server Configured</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>You haven't set up a server directory yet.</p>
+          </div>
+          <button className="btn btn-primary btn-premium glow-accent" onClick={() => setIsImportModalOpen(true)}>
+            Import Existing Server
+          </button>
+        </div>
+        <ImportServerModal
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+          onImportSuccess={handleImportSuccess}
+        />
+      </div>
+    )
   }
 
   return (

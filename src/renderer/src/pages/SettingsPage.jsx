@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Download, FolderOpen, Search, Eye, EyeOff, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
+import ImportServerModal from '../components/common/ImportServerModal'
 
 function SettingsPage() {
   const [settings, setSettings] = useState(null)
@@ -12,6 +13,7 @@ function SettingsPage() {
   const [fetchingVersions, setFetchingVersions] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [javaInstalls, setJavaInstalls] = useState([])
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
 
   // Load settings on mount
   useEffect(() => {
@@ -112,16 +114,8 @@ function SettingsPage() {
     }
   }
 
-  const handleBrowseDir = async () => {
-    try {
-      const dir = await window.api.settings.browseDir()
-      if (dir) {
-        setSettings(prev => ({ ...prev, serverDir: dir }))
-        toast.success('Server directory updated')
-      }
-    } catch (err) {
-      toast.error(err.message)
-    }
+  const handleImportSuccess = () => {
+    loadSettings()
   }
 
   const handleDetectJava = async () => {
@@ -350,10 +344,10 @@ function SettingsPage() {
           <div className="settings-row">
             <div>
               <label className="settings-label">Server Files Location</label>
-              <p className="settings-description" style={{ maxWidth: 350, wordBreak: 'break-all' }}>{settings.serverDir}</p>
+              <p className="settings-description" style={{ maxWidth: 350, wordBreak: 'break-all' }}>{settings.serverDir || 'Not configured'}</p>
             </div>
-            <button className="btn btn-outline btn-sm btn-premium" onClick={handleBrowseDir}>
-              <FolderOpen size={14} /> Browse
+            <button className="btn btn-outline btn-sm btn-premium" onClick={() => setIsImportModalOpen(true)}>
+              <FolderOpen size={14} /> Import Server
             </button>
           </div>
         </div>
@@ -409,6 +403,12 @@ function SettingsPage() {
           )}
         </div>
       </div>
+
+      <ImportServerModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportSuccess={handleImportSuccess}
+      />
     </div>
   )
 }

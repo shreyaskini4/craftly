@@ -41,24 +41,43 @@ export function registerSettingsIpc(mainWindow) {
       properties: ['openDirectory', 'createDirectory']
     })
     if (!result.canceled && result.filePaths.length > 0) {
-      const dir = result.filePaths[0]
-      settingsStore.set('serverDir', dir)
+      const dirPath = result.filePaths[0]
+      let jars = []
+      let hasEula = false
+      let hasProperties = false
+      let hasWorld = false
+      let inferredType = 'vanilla'
       
       try {
-        const files = fs.readdirSync(dir)
-        const jarFiles = files.filter(f => f.endsWith('.jar'))
-        if (jarFiles.length > 0) {
-          let selectedJar = jarFiles.find(f => f === 'server.jar' || f.includes('paper') || f.includes('forge') || f.includes('fabric'))
-          if (!selectedJar) selectedJar = jarFiles[0]
-          settingsStore.set('serverJar', selectedJar)
+        const files = fs.readdirSync(dirPath)
+        jars = files.filter(f => f.endsWith('.jar'))
+        
+        hasEula = fs.existsSync(path.join(dirPath, 'eula.txt'))
+        hasProperties = fs.existsSync(path.join(dirPath, 'server.properties'))
+        hasWorld = fs.existsSync(path.join(dirPath, 'world', 'level.dat'))
+        
+        if (jars.some(f => f.toLowerCase().includes('paper'))) {
+          inferredType = 'paper'
+        } else if (jars.some(f => f.toLowerCase().includes('forge'))) {
+          inferredType = 'forge'
+        } else if (jars.some(f => f.toLowerCase().includes('fabric'))) {
+          inferredType = 'fabric'
         }
       } catch (err) {
-        console.error('Failed to scan for jar files:', err)
+        console.error('Failed to scan directory:', err)
       }
       
-      return dir
+      return { dirPath, jars, hasEula, hasProperties, hasWorld, inferredType }
     }
     return null
+  })
+
+  ipcMain.handle('settings:import-server', async (_event, data) => {
+    const { dirPath, jarFile, serverType } = data
+    if (dirPath) settingsStore.set('serverDir', dirPath)
+    if (jarFile) settingsStore.set('serverJar', jarFile)
+    if (serverType) settingsStore.set('serverType', serverType)
+    return true
   })
 
   ipcMain.handle('settings:detect-java', async () => {
