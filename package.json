@@ -1,0 +1,36 @@
+{
+  "name": "mc-server-gui",
+  "version": "1.0.0",
+  "description": "A modern desktop GUI for managing a local Minecraft server",
+  "main": "./out/main/index.js",
+  "author": "MC Server GUI",
+  "license": "MIT",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "start": "electron-vite preview",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "electron-store": "^10.0.0",
+    "extract-zip": "^2.0.1",
+    "minecraft-server-util": "^5.4.2",
+    "rcon-client": "^4.2.4",
+    "recharts": "^2.15.3",
+    "systeminformation": "^5.25.11",
+    "zustand": "^5.0.5",
+    "lucide-react": "^0.511.0",
+    "sonner": "^2.0.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.5.2",
+    "electron": "^36.3.1",
+    "electron-vite": "^3.1.0",
+    "electron-builder": "^26.0.12",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "vite": "^6.3.5"
+  }
+}
