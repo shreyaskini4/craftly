@@ -28,7 +28,20 @@ export function registerMonitoringIpc(mainWindow) {
       setTimeout(async () => {
         const settings = settingsStore.getAll()
         if (settings.rconEnabled) {
-          await rconManager.connect('localhost', settings.rconPort, settings.rconPassword)
+          try {
+            const connected = await rconManager.connect('localhost', settings.rconPort, settings.rconPassword)
+            if (!connected) {
+              console.error('RCON Auth failed')
+              if (mainWindow && !mainWindow.isDestroyed()) {
+                mainWindow.webContents.send('monitoring:error', 'RCON Connection Failed')
+              }
+            }
+          } catch (err) {
+            console.error('RCON Auth failed', err)
+            if (mainWindow && !mainWindow.isDestroyed()) {
+              mainWindow.webContents.send('monitoring:error', 'RCON Connection Failed')
+            }
+          }
         }
       }, 10000)
     }

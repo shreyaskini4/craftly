@@ -22,7 +22,9 @@ export function registerServerIpc(mainWindow) {
       jarPath,
       xmx: settings.xmx || '4G',
       xms: settings.xms || '2G',
-      serverDir
+      serverDir,
+      rconPort: settings.rconPort || 25575,
+      rconPassword: settings.rconPassword || 'craftly_rcon_pass'
     }
 
     // Remove old listener if exists

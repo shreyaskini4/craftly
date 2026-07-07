@@ -35,14 +35,14 @@ class MonitorService extends EventEmitter {
           this.emit('stats', {
             cpu: Math.round(proc.cpu * 10) / 10,
             ram: {
-              used: Math.round(proc.memRss / 1024 / 1024), // MB
-              percent: Math.round(proc.memRss / os.totalmem() * 100 * 10) / 10
+              used: Math.round(proc.memRss / 1024), // MB
+              percent: Math.round((proc.memRss * 1024) / os.totalmem() * 100 * 10) / 10
             },
             timestamp: Date.now()
           })
         }
       } catch (err) {
-        // Silently fail - process might have exited
+        console.error('Monitoring query failed:', err.message)
       }
     }, 2000)
   }
