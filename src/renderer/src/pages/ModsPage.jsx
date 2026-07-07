@@ -90,7 +90,7 @@ function ModsPage() {
 
       {activeTab === 'browse' && (
         <>
-          <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+          <div className="flex flex-wrap gap-md" style={{ marginBottom: 'var(--space-md)' }}>
             <div className="search-container" style={{ flex: 1, minWidth: 200 }}>
               <Search size={16} className="search-icon" />
               <input
@@ -141,7 +141,7 @@ function ModsPage() {
             <>
               <div className="mod-grid">
                 {searchResults.hits.map(hit => (
-                  <div key={hit.project_id} className="mod-card card glass-card">
+                  <div key={hit.project_id} className="mod-card">
                     <div className="mod-card-header">
                       {hit.icon_url ? (
                         <img className="mod-icon" src={hit.icon_url} alt={hit.title} style={{ borderRadius: 'var(--radius-sm)' }} />
@@ -204,9 +204,9 @@ function ModsPage() {
               <p>No mods installed yet. Browse mods to get started!</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div className="flex-col gap-sm">
               {installedMods.map(mod => (
-                <div key={mod.filename} className="backup-item glass-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px' }}>
+                <div key={mod.filename} className="backup-item">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     {mod.iconUrl ? (
                       <img src={mod.iconUrl} alt={mod.title} style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)' }} />

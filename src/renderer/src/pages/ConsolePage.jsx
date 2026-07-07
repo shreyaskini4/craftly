@@ -131,16 +131,16 @@ function ConsolePage() {
         </div>
       </div>
 
-      <div className="console-container glass-card" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: 'rgba(13, 17, 23, 0.45)' }}>
-        <div className="console-output" ref={consoleContainerRef} onScroll={handleScroll} style={{ flex: 1, overflowY: 'auto' }}>
+      <div className="console-container" style={{ flex: 1, minHeight: 0 }}>
+        <div className="console-output" ref={consoleContainerRef} onScroll={handleScroll}>
           {consoleLines.length === 0 ? (
             <div className="empty-state" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <p style={{ color: 'var(--text-tertiary)' }}>No console output yet. Start the server to see logs.</p>
             </div>
           ) : (
             consoleLines.map(line => (
-              <div key={line.id} className={`console-line ${getLineClass(line.text)}`} style={{ padding: '4px 0' }}>
-                <span className="timestamp" style={{ opacity: 0.8 }}>[{formatTime(line.timestamp)}]</span>
+              <div key={line.id} className={`console-line ${getLineClass(line.text)}`}>
+                <span className="timestamp">[{formatTime(line.timestamp)}]</span>
                 <span className="text">{line.text}</span>
               </div>
             ))
@@ -148,8 +148,8 @@ function ConsolePage() {
           <div ref={consoleEndRef} />
         </div>
 
-        <div className="console-input" style={{ background: 'rgba(22, 27, 34, 0.8)', borderTop: '1px solid var(--border)', padding: '12px 16px', display: 'flex', alignItems: 'center' }}>
-          <ChevronRight size={16} style={{ color: 'var(--accent)', flexShrink: 0, marginRight: 8 }} />
+        <div className="console-input">
+          <ChevronRight size={16} style={{ color: 'var(--color-primary)', flexShrink: 0, marginRight: 8 }} />
           <input
             ref={inputRef}
             type="text"

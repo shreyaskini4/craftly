@@ -7,7 +7,7 @@ import { downloadFile } from '../utils/download.js'
 function fetchJson(url) {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http
-    client.get(url, { headers: { 'User-Agent': 'mc-server-gui/1.0.0' } }, (res) => {
+    client.get(url, { headers: { 'User-Agent': 'craftly/1.0.0' } }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         return fetchJson(res.headers.location).then(resolve).catch(reject)
       }

@@ -1,4 +1,4 @@
-# Craftly - MC Server GUI
+# Craftly
 
 Craftly is a modern, cross-platform desktop application built with Electron, React, and Vite that allows you to easily manage and host local Minecraft servers. Designed with a beautiful dark-mode glassmorphic interface, it brings all the power of server administration into an intuitive and user-friendly GUI.
 

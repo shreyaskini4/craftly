@@ -1,5 +1,5 @@
 appId: com.mcservergui.app
-productName: MC Server GUI
+productName: Craftly
 directories:
   buildResources: build
 files:
@@ -9,7 +9,7 @@ files:
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 win:
-  executableName: mc-server-gui
+  executableName: craftly
   target:
     - nsis
 nsis:

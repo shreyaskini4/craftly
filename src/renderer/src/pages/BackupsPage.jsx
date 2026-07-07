@@ -111,7 +111,7 @@ function BackupsPage() {
       </div>
 
       {/* Auto-backup Config */}
-      <div className="card glass-card" style={{ marginBottom: 20 }}>
+      <div className="settings-section">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <span className="card-title"><Clock size={16} style={{ marginRight: 8, color: 'var(--accent)' }} />Automatic Backups</span>
@@ -146,15 +146,15 @@ function BackupsPage() {
 
       {/* Backup List */}
       {backups.length === 0 ? (
-        <div className="empty-state card glass-card">
+        <div className="empty-state">
           <Archive size={48} style={{ marginBottom: 16, opacity: 0.3 }} />
           <p className="empty-title">No Backups Yet</p>
           <p className="empty-text">Create your first backup using the button above to secure your world files.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="flex-col gap-sm">
           {backups.map(backup => (
-            <div key={backup.path} className="backup-item glass-card" style={{ padding: '14px 20px' }}>
+            <div key={backup.path} className="backup-item">
               <div className="backup-info">
                 <span className="backup-name" style={{ display: 'flex', alignItems: 'center', fontWeight: 600 }}>
                   <Archive size={16} style={{ marginRight: 8, color: 'var(--accent)' }} />

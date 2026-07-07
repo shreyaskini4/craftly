@@ -80,14 +80,14 @@ function DashboardPage({ onNavigate }) {
 
   const tpsValue = tps?.tps1m ?? null
   const tpsColor = tpsValue === null ? 'var(--text-tertiary)' :
-    tpsValue >= 18 ? 'var(--success)' :
-    tpsValue >= 15 ? 'var(--warning)' : 'var(--danger)'
+    tpsValue >= 18 ? 'var(--color-success)' :
+    tpsValue >= 15 ? 'var(--color-warning)' : 'var(--color-danger)'
 
   const chartTooltipStyle = {
     backgroundColor: 'var(--bg-elevated)',
-    border: '1px solid var(--border)',
-    borderRadius: '8px',
-    fontSize: '12px',
+    border: '1px solid var(--border-subtle)',
+    borderRadius: 'var(--radius-md)',
+    fontSize: 'var(--font-xs)',
     color: 'var(--text-primary)'
   }
 
@@ -125,13 +125,13 @@ function DashboardPage({ onNavigate }) {
         {/* Players Card */}
         <div className={`card glass-card ${isOnline && players.online > 0 ? 'glow-success' : ''}`}>
           <div className="card-header">
-            <span className="card-title"><Users size={16} style={{ marginRight: 8, color: 'var(--accent)' }} />Players</span>
+            <span className="card-title"><Users size={16} style={{ marginRight: 8, color: 'var(--color-primary)' }} />Players</span>
           </div>
           <div className="card-value">{players.online}<span style={{ fontSize: 16, color: 'var(--text-tertiary)' }}>/{players.max || 20}</span></div>
           {players.list.length > 0 ? (
             <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
               {players.list.slice(0, 5).map(p => (
-                <div key={p.uuid || p.name} className="player-item" style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)', padding: '6px 10px' }}>
+                <div key={p.uuid || p.name} className="player-item" style={{ background: 'var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '6px 10px' }}>
                   <img
                     className="player-avatar"
                     src={`https://crafatar.com/avatars/${p.uuid}?size=32&overlay`}
@@ -150,7 +150,7 @@ function DashboardPage({ onNavigate }) {
         {/* RAM Usage Card */}
         <div className="card glass-card">
           <div className="card-header">
-            <span className="card-title"><MemoryStick size={16} style={{ marginRight: 8, color: 'var(--accent)' }} />RAM Usage</span>
+            <span className="card-title"><MemoryStick size={16} style={{ marginRight: 8, color: 'var(--color-primary)' }} />RAM Usage</span>
           </div>
           <div className="card-value">{currentRam.used}<span style={{ fontSize: 14, color: 'var(--text-tertiary)' }}> MB</span></div>
           <div className="chart-container" style={{ marginTop: 12 }}>
@@ -158,15 +158,15 @@ function DashboardPage({ onNavigate }) {
               <AreaChart data={ramHistory}>
                 <defs>
                   <linearGradient id="ramGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#58a6ff" stopOpacity={0.35} />
-                    <stop offset="95%" stopColor="#58a6ff" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.35} />
+                    <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
                 <XAxis dataKey="time" hide />
                 <YAxis hide />
                 <Tooltip contentStyle={chartTooltipStyle} className="custom-chart-tooltip" formatter={(v) => [`${v} MB`, 'RAM']} />
-                <Area type="monotone" dataKey="value" stroke="#58a6ff" fill="url(#ramGradient)" strokeWidth={2} dot={false} />
+                <Area type="monotone" dataKey="value" stroke="var(--color-primary)" fill="url(#ramGradient)" strokeWidth={2} dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -175,7 +175,7 @@ function DashboardPage({ onNavigate }) {
         {/* CPU Usage Card */}
         <div className="card glass-card">
           <div className="card-header">
-            <span className="card-title"><Cpu size={16} style={{ marginRight: 8, color: 'var(--success)' }} />CPU Usage</span>
+            <span className="card-title"><Cpu size={16} style={{ marginRight: 8, color: 'var(--color-success)' }} />CPU Usage</span>
           </div>
           <div className="card-value">{currentCpu}<span style={{ fontSize: 14, color: 'var(--text-tertiary)' }}>%</span></div>
           <div className="chart-container" style={{ marginTop: 12 }}>
@@ -183,15 +183,15 @@ function DashboardPage({ onNavigate }) {
               <AreaChart data={cpuHistory}>
                 <defs>
                   <linearGradient id="cpuGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3fb950" stopOpacity={0.35} />
-                    <stop offset="95%" stopColor="#3fb950" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--color-success)" stopOpacity={0.35} />
+                    <stop offset="95%" stopColor="var(--color-success)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
                 <XAxis dataKey="time" hide />
                 <YAxis hide domain={[0, 100]} />
                 <Tooltip contentStyle={chartTooltipStyle} className="custom-chart-tooltip" formatter={(v) => [`${v}%`, 'CPU']} />
-                <Area type="monotone" dataKey="value" stroke="#3fb950" fill="url(#cpuGradient)" strokeWidth={2} dot={false} />
+                <Area type="monotone" dataKey="value" stroke="var(--color-success)" fill="url(#cpuGradient)" strokeWidth={2} dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>

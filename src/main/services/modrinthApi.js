@@ -5,7 +5,7 @@ import path from 'path'
 import { downloadFile } from '../utils/download.js'
 
 const BASE_URL = 'https://api.modrinth.com/v2'
-const USER_AGENT = 'mc-server-gui/1.0.0'
+const USER_AGENT = 'craftly/1.0.0'
 
 function fetchJson(urlPath) {
   const url = urlPath.startsWith('http') ? urlPath : `${BASE_URL}${urlPath}`

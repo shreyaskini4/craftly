@@ -17,8 +17,8 @@ function Modal({ isOpen, onClose, title, children }) {
   if (!isOpen) return null
 
   return createPortal(
-    <div className="modal-overlay fade-in" onClick={onClose}>
-      <div className="modal slide-up" onClick={e => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">{title}</h2>
           <button className="btn btn-ghost btn-icon" onClick={onClose}>

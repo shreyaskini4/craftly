@@ -21,7 +21,7 @@ function Sidebar({ activePage, onNavigate }) {
         <div className="sidebar-brand">
           <span className="sidebar-logo">⛏</span>
           <div>
-            <h1 className="sidebar-title">MC Server GUI</h1>
+            <h1 className="sidebar-title">Craftly</h1>
             <span className="sidebar-version">v1.0.0</span>
           </div>
         </div>

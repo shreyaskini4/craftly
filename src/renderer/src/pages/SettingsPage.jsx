@@ -156,9 +156,9 @@ function SettingsPage() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div className="flex-col">
         {/* Server Configuration */}
-        <div className="settings-section card glass-card" style={{ padding: '24px' }}>
+        <div className="settings-section">
           <h2 className="settings-title">Server Configuration</h2>
 
           <div className="settings-row">
@@ -265,7 +265,7 @@ function SettingsPage() {
         </div>
 
         {/* Java Configuration */}
-        <div className="settings-section card glass-card" style={{ padding: '24px' }}>
+        <div className="settings-section">
           <h2 className="settings-title">Java Configuration</h2>
 
           <div className="settings-row">
@@ -299,7 +299,7 @@ function SettingsPage() {
         </div>
 
         {/* Memory Allocation */}
-        <div className="settings-section card glass-card" style={{ padding: '24px' }}>
+        <div className="settings-section">
           <h2 className="settings-title">Memory Allocation</h2>
 
           <div className="settings-row">
@@ -344,7 +344,7 @@ function SettingsPage() {
         </div>
 
         {/* Server Directory */}
-        <div className="settings-section card glass-card" style={{ padding: '24px' }}>
+        <div className="settings-section">
           <h2 className="settings-title">Server Directory</h2>
 
           <div className="settings-row">
@@ -359,7 +359,7 @@ function SettingsPage() {
         </div>
 
         {/* RCON Configuration */}
-        <div className="settings-section card glass-card" style={{ padding: '24px' }}>
+        <div className="settings-section">
           <h2 className="settings-title">RCON Configuration</h2>
 
           <div className="settings-row">

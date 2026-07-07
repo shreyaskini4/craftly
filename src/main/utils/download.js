@@ -121,7 +121,7 @@ export function fetchJson(url, headers = {}) {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'User-Agent': 'mc-server-gui/1.0.0',
+        'User-Agent': 'craftly/1.0.0',
         ...headers
       }
     }
