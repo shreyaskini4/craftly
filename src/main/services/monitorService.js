@@ -33,7 +33,7 @@ class MonitorService extends EventEmitter {
 
         if (proc) {
           this.emit('stats', {
-            cpu: Math.round(proc.cpu * 10) / 10,
+            cpu: Math.round((proc.cpu / os.cpus().length) * 10) / 10,
             ram: {
               used: Math.round(proc.memRss / 1024), // MB
               percent: Math.round((proc.memRss * 1024) / os.totalmem() * 100 * 10) / 10
