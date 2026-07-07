@@ -4,10 +4,10 @@
 
 :root {
   /* ── Surface Colors ── */
-  --bg-app: #0d1117;
-  --bg-panel: #161b22;
-  --bg-surface: #1c2128;
-  --bg-elevated: #21262d;
+  --bg-app: #111111;
+  --bg-panel: #1e1e1e;
+  --bg-surface: #222222;
+  --bg-elevated: #2a2a2a;
   
   /* ── Glass Colors (Strict Scale) ── */
   --glass-bg-heavy: rgba(13, 17, 23, 0.7);
@@ -17,7 +17,7 @@
   /* ── Borders ── */
   --border-subtle: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.15);
-  --border-accent: rgba(56, 139, 253, 0.3);
+  --border-accent: rgba(147, 51, 234, 0.3);
   
   /* Flat Borders */
   --border-flat: #30363d;
@@ -29,10 +29,15 @@
   --text-tertiary: #6e7681;
 
   /* ── Accents & States ── */
-  --color-primary: #3b82f6;
-  --color-primary-hover: #60a5fa;
-  --color-primary-glow: rgba(59, 130, 246, 0.25);
-  --color-primary-subtle: rgba(59, 130, 246, 0.15);
+  --color-primary: #9333ea;
+  --color-primary-hover: #a855f7;
+  --color-primary-glow: rgba(147, 51, 234, 0.25);
+  --color-primary-subtle: rgba(147, 51, 234, 0.15);
+  
+  --color-secondary: #9333ea;
+  --color-secondary-hover: #a855f7;
+  --color-secondary-glow: rgba(147, 51, 234, 0.25);
+  --color-secondary-subtle: rgba(147, 51, 234, 0.15);
   
   --color-success: #2ea043;
   --color-success-hover: #3fb950;
@@ -104,7 +109,7 @@
   /* ── Borders ── */
   --border-subtle: rgba(0, 0, 0, 0.08);
   --border-strong: rgba(0, 0, 0, 0.15);
-  --border-accent: rgba(59, 130, 246, 0.3);
+  --border-accent: rgba(147, 51, 234, 0.3);
   
   /* Flat Borders */
   --border-flat: #d0d7de;

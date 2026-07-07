@@ -6,6 +6,7 @@ import ConsolePage from './pages/ConsolePage'
 import ModsPage from './pages/ModsPage'
 import BackupsPage from './pages/BackupsPage'
 import SettingsPage from './pages/SettingsPage'
+import ServerPropertiesPage from './pages/ServerPropertiesPage'
 import WelcomePage from './pages/WelcomePage'
 import useServerStore from './stores/serverStore'
 
@@ -33,6 +34,7 @@ function App() {
       case 'mods': return <ModsPage />
       case 'backups': return <BackupsPage />
       case 'settings': return <SettingsPage />
+      case 'properties': return <ServerPropertiesPage />
       default: return <DashboardPage onNavigate={setActivePage} />
     }
   }

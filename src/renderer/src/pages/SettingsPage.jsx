@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import { Download, FolderOpen, Search, Eye, EyeOff, RefreshCw, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import ImportServerModal from '../components/common/ImportServerModal'
-import ServerPropertiesModal from '../components/common/ServerPropertiesModal'
 import useServerStore from '../stores/serverStore'
 
 function SettingsPage() {
@@ -17,7 +16,6 @@ function SettingsPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [javaInstalls, setJavaInstalls] = useState([])
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
-  const [isPropertiesModalOpen, setIsPropertiesModalOpen] = useState(false)
 
   // Load settings on mount
   useEffect(() => {
@@ -278,28 +276,7 @@ function SettingsPage() {
             </select>
           </div>
 
-          <div className="settings-row">
-            <div>
-              <label className="settings-label">Server Version</label>
-              <p className="settings-description">{settings.serverVersion ? `Current: ${settings.serverVersion}` : 'No version selected'}</p>
-            </div>
-            <div className="flex gap-sm">
-              <select
-                className="select"
-                value={settings.serverVersion}
-                onChange={e => {
-                  updateSetting('serverVersion', e.target.value)
-                }}
-                style={{ width: 150 }}
-              >
-                <option value="">Select version</option>
-                {versions.map(v => <option key={v} value={v}>{v}</option>)}
-              </select>
-              <button className="btn btn-outline btn-sm btn-premium" onClick={() => fetchVersions()} disabled={fetchingVersions}>
-                <RefreshCw size={14} className={fetchingVersions ? 'spin' : ''} /> Fetch
-              </button>
-            </div>
-          </div>
+
 
           {settings.serverType === 'paper' && builds.length > 0 && (
             <div className="settings-row">
@@ -460,21 +437,6 @@ function SettingsPage() {
           </div>
         </div>
 
-        {/* Server Properties */}
-        <div className="settings-section">
-          <h2 className="settings-title">Server Properties</h2>
-
-          <div className="settings-row">
-            <div>
-              <label className="settings-label">Edit server.properties</label>
-              <p className="settings-description">Modify settings like MOTD and max players</p>
-            </div>
-            <button className="btn btn-outline btn-sm btn-premium" onClick={() => setIsPropertiesModalOpen(true)}>
-              Edit Properties
-            </button>
-          </div>
-        </div>
-
         {/* RCON Configuration */}
         <div className="settings-section">
           <h2 className="settings-title">RCON Configuration</h2>
@@ -552,11 +514,6 @@ function SettingsPage() {
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onImportSuccess={handleImportSuccess}
-      />
-
-      <ServerPropertiesModal
-        isOpen={isPropertiesModalOpen}
-        onClose={() => setIsPropertiesModalOpen(false)}
       />
     </div>
   )
