@@ -402,6 +402,27 @@ function SettingsPage() {
             </>
           )}
         </div>
+
+        {/* App Settings */}
+        <div className="settings-section">
+          <h2 className="settings-title">App Settings</h2>
+
+          <div className="settings-row">
+            <div>
+              <label className="settings-label">Switch / Reconfigure Server</label>
+              <p className="settings-description">Go back to the welcome screen to set up a different server</p>
+            </div>
+            <button 
+              className="btn btn-outline btn-sm btn-premium" 
+              onClick={async () => {
+                await window.api.settings.set('onboardingComplete', false)
+                window.location.reload()
+              }}
+            >
+              Switch / Reconfigure Server
+            </button>
+          </div>
+        </div>
       </div>
 
       <ImportServerModal

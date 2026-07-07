@@ -87,3 +87,36 @@
   --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: 300ms cubic-bezier(0.25, 0.8, 0.25, 1);
 }
+
+/* ── Light Theme Overrides ── */
+.light-theme {
+  /* ── Surface Colors ── */
+  --bg-app: #f6f8fa;
+  --bg-panel: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  
+  /* ── Glass Colors ── */
+  --glass-bg-heavy: rgba(255, 255, 255, 0.7);
+  --glass-bg-medium: rgba(255, 255, 255, 0.45);
+  --glass-bg-light: rgba(255, 255, 255, 0.35);
+
+  /* ── Borders ── */
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.15);
+  --border-accent: rgba(59, 130, 246, 0.3);
+  
+  /* Flat Borders */
+  --border-flat: #d0d7de;
+  --border-flat-hover: #afb8c1;
+
+  /* ── Typography ── */
+  --text-primary: #1F2328;
+  --text-secondary: #656d76;
+  --text-tertiary: #8c959f;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.15), 0 0 16px rgba(0, 0, 0, 0.05);
+}

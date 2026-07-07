@@ -24,7 +24,10 @@ const defaults = {
   rconPassword: 'changeme',
   autoBackupEnabled: false,
   autoBackupInterval: 6,
-  installedMods: []
+  installedMods: [],
+  onboardingComplete: false,
+  serverJar: '',
+  theme: 'dark'
 }
 
 const store = new Store({

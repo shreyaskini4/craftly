@@ -1,4 +1,5 @@
-import { LayoutDashboard, Terminal, Package, Archive, Settings } from 'lucide-react'
+import { LayoutDashboard, Terminal, Package, Archive, Settings, Sun, Moon } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import useServerStore from '../../stores/serverStore'
 
 const navItems = [
@@ -13,6 +14,25 @@ function Sidebar({ activePage, onNavigate }) {
   const status = useServerStore(state => state.status)
   const isOnline = status === 'online'
   const isTransitional = status === 'starting' || status === 'stopping'
+  
+  const [theme, setTheme] = useState('dark')
+
+  useEffect(() => {
+    window.api.settings.get().then(s => {
+      setTheme(s.theme || 'dark')
+    })
+  }, [])
+
+  const toggleTheme = async () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark'
+    setTheme(newTheme)
+    await window.api.settings.update({ theme: newTheme })
+    if (newTheme === 'light') {
+      document.body.classList.add('light-theme')
+    } else {
+      document.body.classList.remove('light-theme')
+    }
+  }
 
   return (
     <aside className="sidebar">
@@ -41,6 +61,11 @@ function Sidebar({ activePage, onNavigate }) {
             </button>
           )
         })}
+        <div style={{ flex: 1 }} />
+        <button className="sidebar-item" onClick={toggleTheme} style={{ marginTop: 'auto', justifyContent: 'center' }}>
+          {theme === 'dark' ? <Sun size={20} className="icon" /> : <Moon size={20} className="icon" />}
+          <span className="label">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+        </button>
       </nav>
 
       <div className="sidebar-status">

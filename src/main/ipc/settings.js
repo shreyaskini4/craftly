@@ -84,6 +84,19 @@ export function registerSettingsIpc(mainWindow) {
     return await detectJava()
   })
 
+  ipcMain.handle('settings:check-dir-empty', async (_event, dirPath) => {
+    try {
+      if (!fs.existsSync(dirPath)) {
+        return true
+      }
+      const files = fs.readdirSync(dirPath)
+      return files.length === 0
+    } catch (err) {
+      console.error('Failed to check directory:', err)
+      return false
+    }
+  })
+
   // Window controls
   ipcMain.handle('window:minimize', () => {
     mainWindow?.minimize()

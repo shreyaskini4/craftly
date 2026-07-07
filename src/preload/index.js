@@ -48,7 +48,8 @@ contextBridge.exposeInMainWorld('api', {
     browseJava: () => ipcRenderer.invoke('settings:browse-java'),
     scanDir: () => ipcRenderer.invoke('settings:browse-dir'),
     importServer: (data) => ipcRenderer.invoke('settings:import-server', data),
-    detectJava: () => ipcRenderer.invoke('settings:detect-java')
+    detectJava: () => ipcRenderer.invoke('settings:detect-java'),
+    checkDirEmpty: (dirPath) => ipcRenderer.invoke('settings:check-dir-empty', dirPath)
   },
 
   // ─── Event Listeners (main → renderer push channels) ──────────────

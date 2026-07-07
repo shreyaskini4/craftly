@@ -1683,6 +1683,19 @@ body {
   backdrop-filter: blur(8px);
   border: 1px solid rgba(240, 246, 252, 0.1) !important;
   border-radius: var(--radius-sm);
-  padding: 10px 14px;
   box-shadow: var(--shadow-lg);
+}
+
+/* ── Light Theme Overrides ── */
+.light-theme {
+  --bg-primary: #f6f8fa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f3f4f6;
+  
+  --border: #d0d7de;
+  --border-hover: #afb8c1;
+  
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-subtle: rgba(59, 130, 246, 0.1);
 }
