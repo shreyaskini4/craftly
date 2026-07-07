@@ -89,7 +89,7 @@
 }
 
 /* ── Light Theme Overrides ── */
-.light-theme {
+[data-theme="light"] {
   /* ── Surface Colors ── */
   --bg-app: #f6f8fa;
   --bg-panel: #ffffff;

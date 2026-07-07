@@ -1687,7 +1687,7 @@ body {
 }
 
 /* ── Light Theme Overrides ── */
-.light-theme {
+[data-theme="light"] {
   --bg-primary: #f6f8fa;
   --bg-secondary: #ffffff;
   --bg-tertiary: #f3f4f6;

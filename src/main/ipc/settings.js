@@ -3,6 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import settingsStore from '../services/settingsStore.js'
 import { detectJava, validateJavaPath } from '../utils/javaDetector.js'
+import { readProperties, writeProperties } from '../utils/serverProperties.js'
 
 export function registerSettingsIpc(mainWindow) {
   ipcMain.handle('settings:get', async () => {
@@ -95,6 +96,18 @@ export function registerSettingsIpc(mainWindow) {
       console.error('Failed to check directory:', err)
       return false
     }
+  })
+
+  ipcMain.handle('properties:read', async () => {
+    const serverDir = settingsStore.get('serverDir')
+    if (!serverDir) throw new Error('Server directory not set')
+    return await readProperties(serverDir)
+  })
+
+  ipcMain.handle('properties:write', async (_event, props) => {
+    const serverDir = settingsStore.get('serverDir')
+    if (!serverDir) throw new Error('Server directory not set')
+    return await writeProperties(serverDir, props)
   })
 
   // Window controls

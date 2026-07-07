@@ -49,6 +49,19 @@ const useMonitorStore = create((set) => ({
       serverInfo: { version: '', motd: '' }
     }),
 
+  fetchStats: () => {
+    setInterval(async () => {
+      try {
+        if (window.api && window.api.server) {
+          const status = await window.api.server.getStatus()
+          // Optionally update state if needed, but primarily catching errors
+        }
+      } catch (err) {
+        console.error('Error fetching server status:', err)
+      }
+    }, 5000)
+  },
+
   initListeners: () => {
     if (listenersInitialized || !window.api) return
     listenersInitialized = true
@@ -56,6 +69,8 @@ const useMonitorStore = create((set) => ({
     window.api.on.monitorStats((stats) => {
       useMonitorStore.getState().updateStats(stats)
     })
+    
+    useMonitorStore.getState().fetchStats()
   }
 }))
 

@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 import { spawn, execSync } from 'child_process'
 import path from 'path'
+import { ensureRcon } from '../utils/serverProperties.js'
 
 /**
  * Manages the lifecycle of a Minecraft server Java process.
@@ -42,14 +43,21 @@ class ServerProcess extends EventEmitter {
    * @returns {Promise<void>}
    */
   start(config) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (this.running) {
         reject(new Error('Server is already running'))
         return
       }
 
-      const { javaPath = 'java', jarPath, xmx = '4G', xms = '2G', serverDir } = config
+      const { javaPath = 'java', jarPath, xmx = '4G', xms = '2G', serverDir, rconPort, rconPassword } = config
       this.lastConfig = config
+
+      try {
+        await ensureRcon(serverDir, rconPort, rconPassword)
+      } catch (err) {
+        reject(new Error(`Failed to ensure RCON: ${err.message}`))
+        return
+      }
 
       const args = [`-Xmx${xmx}`, `-Xms${xms}`, '-jar', jarPath, 'nogui']
 

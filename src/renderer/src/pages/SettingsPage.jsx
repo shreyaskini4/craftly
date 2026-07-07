@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Download, FolderOpen, Search, Eye, EyeOff, RefreshCw, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import ImportServerModal from '../components/common/ImportServerModal'
+import ServerPropertiesModal from '../components/common/ServerPropertiesModal'
 import useServerStore from '../stores/serverStore'
 
 function SettingsPage() {
@@ -16,6 +17,7 @@ function SettingsPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [javaInstalls, setJavaInstalls] = useState([])
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
+  const [isPropertiesModalOpen, setIsPropertiesModalOpen] = useState(false)
 
   // Load settings on mount
   useEffect(() => {
@@ -458,6 +460,21 @@ function SettingsPage() {
           </div>
         </div>
 
+        {/* Server Properties */}
+        <div className="settings-section">
+          <h2 className="settings-title">Server Properties</h2>
+
+          <div className="settings-row">
+            <div>
+              <label className="settings-label">Edit server.properties</label>
+              <p className="settings-description">Modify settings like MOTD and max players</p>
+            </div>
+            <button className="btn btn-outline btn-sm btn-premium" onClick={() => setIsPropertiesModalOpen(true)}>
+              Edit Properties
+            </button>
+          </div>
+        </div>
+
         {/* RCON Configuration */}
         <div className="settings-section">
           <h2 className="settings-title">RCON Configuration</h2>
@@ -535,6 +552,11 @@ function SettingsPage() {
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onImportSuccess={handleImportSuccess}
+      />
+
+      <ServerPropertiesModal
+        isOpen={isPropertiesModalOpen}
+        onClose={() => setIsPropertiesModalOpen(false)}
       />
     </div>
   )

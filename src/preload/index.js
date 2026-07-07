@@ -52,6 +52,12 @@ contextBridge.exposeInMainWorld('api', {
     checkDirEmpty: (dirPath) => ipcRenderer.invoke('settings:check-dir-empty', dirPath)
   },
 
+  // ─── Properties ───────────────────────────────────────────────────
+  properties: {
+    read: () => ipcRenderer.invoke('properties:read'),
+    write: (props) => ipcRenderer.invoke('properties:write', props)
+  },
+
   // ─── Event Listeners (main → renderer push channels) ──────────────
   on: {
     consoleLine: (callback) => {

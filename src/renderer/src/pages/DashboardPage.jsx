@@ -104,7 +104,8 @@ function DashboardPage({ onNavigate }) {
   const isOnline = status === 'online'
   const isOffline = status === 'offline'
 
-  const tpsValue = tps?.tps1m ?? null
+  const tpsError = tps?.error
+  const tpsValue = (!tpsError && typeof tps?.tps1m === 'number') ? tps.tps1m : null
   const tpsColor = tpsValue === null ? 'var(--text-tertiary)' :
     tpsValue >= 18 ? 'var(--color-success)' :
     tpsValue >= 15 ? 'var(--color-warning)' : 'var(--color-danger)'
@@ -265,16 +266,24 @@ function DashboardPage({ onNavigate }) {
 
       {/* Bottom Row: TPS + Quick Actions */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 2.5fr', gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
-        <div className={`card ${isOnline && tpsValue >= 18 ? 'glow-success' : isOnline && tpsValue >= 15 ? 'glow-warning' : isOnline ? 'glow-danger' : ''}`}>
+        <div className={`card ${!tpsError && isOnline && tpsValue >= 18 ? 'glow-success' : !tpsError && isOnline && tpsValue >= 15 ? 'glow-warning' : !tpsError && isOnline && tpsValue !== null ? 'glow-danger' : ''}`}>
           <div className="card-header">
             <span className="card-title"><div className={`icon-chip ${tpsIconClass}`.trim()}><Activity size={16} /></div>TPS</span>
           </div>
-          <div className="card-value" style={{ color: tpsColor }}>
-            {tpsValue !== null ? tpsValue.toFixed(1) : 'N/A'}
-          </div>
-          <p className="card-subtitle">
-            {tpsValue !== null ? (tpsValue >= 18 ? 'Excellent' : tpsValue >= 15 ? 'Moderate' : 'Poor') : 'Server offline or TPS unavailable'}
-          </p>
+          {tpsError ? (
+            <div style={{ fontSize: 'var(--font-sm)', color: 'var(--text-tertiary)', marginTop: 'var(--space-sm)' }}>
+              {tpsError}
+            </div>
+          ) : (
+            <>
+              <div className="card-value" style={{ color: tpsColor }}>
+                {tpsValue !== null ? tpsValue.toFixed(1) : 'N/A'}
+              </div>
+              <p className="card-subtitle">
+                {tpsValue !== null ? (tpsValue >= 18 ? 'Excellent' : tpsValue >= 15 ? 'Moderate' : 'Poor') : 'Server offline or TPS unavailable'}
+              </p>
+            </>
+          )}
         </div>
 
         <div className="card">

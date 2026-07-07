@@ -19,9 +19,9 @@ function App() {
     window.api.settings.get().then(s => {
       setSettings(s)
       if (s.theme === 'light') {
-        document.body.classList.add('light-theme')
+        document.documentElement.setAttribute('data-theme', 'light')
       } else {
-        document.body.classList.remove('light-theme')
+        document.documentElement.removeAttribute('data-theme')
       }
     })
   }, [])
@@ -45,7 +45,7 @@ function App() {
     return (
       <div className="app-layout" style={{ display: 'block' }}>
         <WelcomePage onComplete={() => setSettings(prev => ({ ...prev, onboardingComplete: true }))} />
-        <Toaster theme="dark" position="bottom-right" richColors closeButton />
+        <Toaster theme={settings?.theme || 'dark'} position="bottom-right" richColors closeButton />
       </div>
     )
   }
@@ -56,7 +56,7 @@ function App() {
       <main className="main-content">
         {renderPage()}
       </main>
-      <Toaster theme="dark" position="bottom-right" richColors closeButton />
+      <Toaster theme={settings?.theme || 'dark'} position="bottom-right" richColors closeButton />
     </div>
   )
 }

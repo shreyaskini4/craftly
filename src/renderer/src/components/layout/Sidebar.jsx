@@ -28,9 +28,9 @@ function Sidebar({ activePage, onNavigate }) {
     setTheme(newTheme)
     await window.api.settings.update({ theme: newTheme })
     if (newTheme === 'light') {
-      document.body.classList.add('light-theme')
+      document.documentElement.setAttribute('data-theme', 'light')
     } else {
-      document.body.classList.remove('light-theme')
+      document.documentElement.removeAttribute('data-theme')
     }
   }
 

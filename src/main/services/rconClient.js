@@ -1,3 +1,5 @@
+import settingsStore from './settingsStore'
+
 class RconManager {
   constructor() {
     this.client = null
@@ -53,6 +55,16 @@ class RconManager {
 
   async getTps() {
     try {
+      const serverType = settingsStore.get('serverType')
+      if (serverType !== 'paper') {
+        return {
+          tps1m: 'N/A',
+          tps5m: 'N/A',
+          tps15m: 'N/A',
+          error: 'TPS monitoring requires a Paper server'
+        }
+      }
+
       const response = await this.sendCommand('tps')
       // Paper/Spigot format: §aTPS from last 1m, 5m, 15m: §a*20.0, §a*20.0, §a*20.0
       const cleaned = response.replace(/§[0-9a-fk-or]/g, '').replace(/\*/g, '')
