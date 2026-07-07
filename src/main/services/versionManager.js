@@ -52,7 +52,7 @@ export async function downloadVanillaServer(versionId, serverDir, onProgress) {
 
 export async function fetchPaperVersions() {
   try {
-    const data = await fetchJson('https://api.papermc.io/v2/projects/paper')
+    const data = await fetchJson('https://fill.papermc.io/v3/projects/paper')
     return data.versions || []
   } catch (err) {
     console.error('Failed to fetch Paper versions:', err.message)
@@ -62,7 +62,7 @@ export async function fetchPaperVersions() {
 
 export async function fetchPaperBuilds(version) {
   try {
-    const data = await fetchJson(`https://api.papermc.io/v2/projects/paper/versions/${version}`)
+    const data = await fetchJson(`https://fill.papermc.io/v3/projects/paper/versions/${version}`)
     return data.builds || []
   } catch (err) {
     console.error('Failed to fetch Paper builds:', err.message)
@@ -71,8 +71,9 @@ export async function fetchPaperBuilds(version) {
 }
 
 export async function downloadPaperServer(version, build, serverDir, onProgress) {
-  const filename = `paper-${version}-${build}.jar`
-  const url = `https://api.papermc.io/v2/projects/paper/versions/${version}/builds/${build}/downloads/${filename}`
+  const buildData = await fetchJson(`https://fill.papermc.io/v3/projects/paper/versions/${version}/builds/${build}`)
+  const filename = buildData.downloads.application.name
+  const url = `https://fill.papermc.io/v3/projects/paper/versions/${version}/builds/${build}/downloads/${filename}`
   const destPath = path.join(serverDir, 'server.jar')
   fs.mkdirSync(serverDir, { recursive: true })
   await downloadFile(url, destPath, onProgress)

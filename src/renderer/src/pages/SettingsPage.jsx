@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Download, FolderOpen, Search, Eye, EyeOff, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import ImportServerModal from '../components/common/ImportServerModal'
@@ -27,6 +27,38 @@ function SettingsPage() {
       window.api.removeListener.downloadProgress(handler)
     }
   }, [])
+
+  const isMountedRef = useRef(false)
+  useEffect(() => {
+    if (!isMountedRef.current) {
+      if (settings) isMountedRef.current = true
+      return
+    }
+    updateSetting('serverBuild', '')
+  }, [settings?.serverType, settings?.serverVersion])
+
+  const isInitialFetchRef = useRef(true)
+  useEffect(() => {
+    if (!settings?.serverVersion) return
+
+    const isInitial = isInitialFetchRef.current
+    if (settings) isInitialFetchRef.current = false
+
+    if (settings.serverType === 'paper') {
+      window.api.versions.fetchPaperBuilds(settings.serverVersion)
+        .then(b => setBuilds(b))
+        .catch(err => toast.error(err.message))
+    } else if (settings.serverType === 'fabric') {
+      window.api.versions.fetchFabricLoaders(settings.serverVersion)
+        .then(l => {
+          setLoaders(l)
+          if (l.length > 0 && !isInitial) {
+            updateSetting('serverBuild', l[0].version)
+          }
+        })
+        .catch(err => toast.error(err.message))
+    }
+  }, [settings?.serverType, settings?.serverVersion])
 
   const loadSettings = async () => {
     try {
@@ -74,21 +106,56 @@ function SettingsPage() {
     setFetchingVersions(false)
   }
 
-  const fetchBuildsForVersion = async (version) => {
-    try {
-      if (settings?.serverType === 'paper') {
-        const b = await window.api.versions.fetchPaperBuilds(version)
-        setBuilds(b)
-      } else if (settings?.serverType === 'fabric') {
-        const l = await window.api.versions.fetchFabricLoaders(version)
-        setLoaders(l.map(l => l.version))
-      }
-    } catch (err) {
-      toast.error(err.message)
-    }
-  }
 
   const handleDownload = async () => {
+    if ((settings.serverType === 'paper' || settings.serverType === 'fabric') && !settings.serverBuild) {
+      toast.error('Please select a build/loader version.')
+      return
+    }
+
+    try {
+      if (settings.serverVersion) {
+        const parts = settings.serverVersion.split('.').map(Number)
+        const minor = parts[1] || 0
+        const patch = parts[2] || 0
+
+        let reqJava = 8
+        if (minor >= 21 || (minor === 20 && patch >= 5)) {
+          reqJava = 21
+        } else if (minor >= 17) {
+          reqJava = 17
+        }
+
+        const installs = await window.api.settings.detectJava()
+        const selectedJava = installs.find(j => j.path === settings.javaPath)
+        
+        if (selectedJava) {
+          let currentMajor = 0
+          if (selectedJava.version.startsWith('1.')) {
+            currentMajor = parseInt(selectedJava.version.split('.')[1])
+          } else {
+            currentMajor = parseInt(selectedJava.version.split('.')[0])
+          }
+
+          let mismatch = false
+          if (reqJava === 8) {
+            mismatch = (currentMajor !== 8 && currentMajor !== 11)
+          } else {
+            mismatch = (currentMajor !== reqJava)
+          }
+
+          if (mismatch) {
+            const proceed = window.confirm(`Warning: Minecraft ${settings.serverVersion} requires Java ${reqJava}. You have Java ${currentMajor}. The server may crash. Download anyway?`)
+            if (!proceed) {
+              return
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Java check failed:', err)
+    }
+
     setDownloading(true)
     setDownloadProgress(0)
     try {
@@ -188,7 +255,6 @@ function SettingsPage() {
                 value={settings.serverVersion}
                 onChange={e => {
                   updateSetting('serverVersion', e.target.value)
-                  fetchBuildsForVersion(e.target.value)
                 }}
                 style={{ width: 150 }}
               >
@@ -227,11 +293,12 @@ function SettingsPage() {
               </div>
               <select
                 className="select"
-                value={settings.serverBuild}
+                value={settings.serverBuild || ''}
                 onChange={e => updateSetting('serverBuild', e.target.value)}
                 style={{ width: 150 }}
               >
-                {loaders.map(l => <option key={l} value={l}>{l}</option>)}
+                <option value="">Select a loader...</option>
+                {loaders.map(l => <option key={l.version} value={l.version}>{l.version}</option>)}
               </select>
             </div>
           )}

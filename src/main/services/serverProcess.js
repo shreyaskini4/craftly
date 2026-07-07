@@ -85,6 +85,10 @@ class ServerProcess extends EventEmitter {
             }
             this.emit('line', lineData)
 
+            if (line.includes('UnsupportedClassVersionError') || line.includes('LinkageError')) {
+              this.emit('status', 'offline', 'Java Compatibility Error: Unsupported Class Version')
+            }
+
             // Detect when server is fully started
             if (line.includes('Done') && line.includes('For help')) {
               this.emit('status', 'online')
@@ -106,6 +110,10 @@ class ServerProcess extends EventEmitter {
               type: 'stderr',
               timestamp: new Date().toISOString()
             })
+
+            if (line.includes('UnsupportedClassVersionError') || line.includes('LinkageError')) {
+              this.emit('status', 'offline', 'Java Compatibility Error: Unsupported Class Version')
+            }
           }
         }
       })
