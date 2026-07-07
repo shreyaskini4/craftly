@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { Download, FolderOpen, Search, Eye, EyeOff, RefreshCw, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import ImportServerModal from '../components/common/ImportServerModal'
+import useServerStore from '../stores/serverStore'
 
 function SettingsPage() {
+  const serverStatus = useServerStore(state => state.status)
   const [settings, setSettings] = useState(null)
   const [versions, setVersions] = useState([])
   const [builds, setBuilds] = useState([])
@@ -112,6 +114,11 @@ function SettingsPage() {
 
 
   const handleDownload = async () => {
+    if (serverStatus !== 'offline') {
+      toast.error('You cannot download or upgrade a server while it is running. Please stop the server first.')
+      return
+    }
+
     if ((settings.serverType === 'paper' || settings.serverType === 'fabric') && !settings.serverBuild) {
       toast.error('Please select a build/loader version.')
       return

@@ -37,8 +37,13 @@ class BackupManager extends EventEmitter {
       worldFolders.push('worlds')
     }
 
-    if (worldFolders.length === 0) {
-      throw new Error(`Neither world folder "${levelName}" nor "worlds" found in server directory`)
+    const configFiles = ['server.properties', 'ops.json', 'whitelist.json', 'banned-players.json', 'banned-ips.json']
+    const existingConfigs = configFiles.filter(file => fs.existsSync(path.join(serverDir, file)))
+
+    if (worldFolders.length === 0 && existingConfigs.length === 0) {
+      // Nothing to back up (e.g. fresh server). Gracefully skip.
+      const now = new Date()
+      return { name: 'skipped', path: null, size: 0, date: now.toISOString() }
     }
 
     const now = new Date()
@@ -84,12 +89,9 @@ class BackupManager extends EventEmitter {
       }
 
       // Also back up key config files
-      const configFiles = ['server.properties', 'ops.json', 'whitelist.json', 'banned-players.json', 'banned-ips.json']
-      for (const file of configFiles) {
+      for (const file of existingConfigs) {
         const filePath = path.join(serverDir, file)
-        if (fs.existsSync(filePath)) {
-          archive.file(filePath, { name: file })
-        }
+        archive.file(filePath, { name: file })
       }
 
       archive.finalize()
