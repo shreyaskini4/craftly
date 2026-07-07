@@ -1,6 +1,6 @@
 import https from 'https'
 import http from 'http'
-import { createWriteStream, existsSync, unlinkSync } from 'fs'
+import { createWriteStream, existsSync, unlinkSync, renameSync } from 'fs'
 import { mkdir } from 'fs/promises'
 import { dirname } from 'path'
 
@@ -27,9 +27,11 @@ export function downloadFile(url, destPath, onProgress = null, maxRedirects = 5)
       const parsedUrl = new URL(currentUrl)
       const client = parsedUrl.protocol === 'https:' ? https : http
 
+      const tempPath = destPath + '.downloading'
+      
       // Helper to remove partial file on failure
       const cleanupPartial = () => {
-        try { if (existsSync(destPath)) unlinkSync(destPath) } catch { /* ignore */ }
+        try { if (existsSync(tempPath)) unlinkSync(tempPath) } catch { /* ignore */ }
       }
 
       const request = client.get(currentUrl, (response) => {
@@ -54,7 +56,7 @@ export function downloadFile(url, destPath, onProgress = null, maxRedirects = 5)
         const totalBytes = parseInt(headers['content-length'], 10) || 0
         let downloadedBytes = 0
 
-        const fileStream = createWriteStream(destPath)
+        const fileStream = createWriteStream(tempPath)
 
         response.on('data', (chunk) => {
           downloadedBytes += chunk.length
@@ -70,7 +72,15 @@ export function downloadFile(url, destPath, onProgress = null, maxRedirects = 5)
         response.pipe(fileStream)
 
         fileStream.on('finish', () => {
-          fileStream.close(() => resolve(destPath))
+          fileStream.close(() => {
+            try {
+              renameSync(tempPath, destPath)
+              resolve(destPath)
+            } catch (err) {
+              cleanupPartial()
+              reject(new Error(`Failed to rename downloaded file: ${err.message}`))
+            }
+          })
         })
 
         fileStream.on('error', (err) => {

@@ -38,9 +38,9 @@ async function pathExists(filePath) {
 }
 
 /**
- * Runs `java -version` at the given java executable path and extracts the version string.
+ * Runs `java -version` at the given java executable path and extracts the version and architecture.
  * @param {string} javaPath - Path to the java executable
- * @returns {Promise<string|null>} The version string or null if invalid
+ * @returns {Promise<{version: string, arch: string}|null>} The version object or null if invalid
  */
 async function getJavaVersion(javaPath) {
   try {
@@ -50,14 +50,17 @@ async function getJavaVersion(javaPath) {
       windowsHide: true
     })
     const output = stderr || ''
+    
+    const arch = output.toLowerCase().includes('64-bit') ? '64-bit' : '32-bit'
+
     // Match patterns like: openjdk version "21.0.1" or java version "1.8.0_391"
     const match = output.match(/(?:java|openjdk)\s+version\s+"([^"]+)"/i)
     if (match) {
-      return match[1]
+      return { version: match[1], arch }
     }
     // Fallback: try to match any version number pattern
     const fallback = output.match(/(\d+[\d._-]+\d+)/)
-    return fallback ? fallback[1] : 'unknown'
+    return { version: fallback ? fallback[1] : 'unknown', arch }
   } catch {
     return null
   }
@@ -94,7 +97,7 @@ async function searchDirectory(parentDir) {
  * Detects installed Java installations on the system.
  * Checks JAVA_HOME, PATH, and common installation directories.
  *
- * @returns {Promise<Array<{path: string, version: string}>>} Array of detected Java installations
+ * @returns {Promise<Array<{path: string, version: string, arch: string}>>} Array of detected Java installations
  */
 export async function detectJava() {
   const candidates = new Set()
@@ -163,9 +166,9 @@ export async function detectJava() {
 
   // 4. Validate each candidate and get version
   for (const candidatePath of candidates) {
-    const version = await getJavaVersion(candidatePath)
-    if (version) {
-      results.push({ path: candidatePath, version })
+    const javaInfo = await getJavaVersion(candidatePath)
+    if (javaInfo) {
+      results.push({ path: candidatePath, version: javaInfo.version, arch: javaInfo.arch })
     }
   }
 
@@ -186,6 +189,6 @@ export async function detectJava() {
  * @returns {Promise<boolean>} true if the path is a valid Java executable
  */
 export async function validateJavaPath(javaPath) {
-  const version = await getJavaVersion(javaPath)
-  return version !== null
+  const javaInfo = await getJavaVersion(javaPath)
+  return javaInfo !== null
 }

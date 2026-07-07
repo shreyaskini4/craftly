@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Download, FolderOpen, Search, Eye, EyeOff, RefreshCw } from 'lucide-react'
+import { Download, FolderOpen, Search, Eye, EyeOff, RefreshCw, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import ImportServerModal from '../components/common/ImportServerModal'
 
@@ -18,6 +18,10 @@ function SettingsPage() {
   // Load settings on mount
   useEffect(() => {
     loadSettings()
+    
+    window.api.settings.detectJava()
+      .then(setJavaInstalls)
+      .catch(console.error)
 
     const handler = window.api.on.downloadProgress((progress) => {
       setDownloadProgress(progress.percent || 0)
@@ -159,10 +163,16 @@ function SettingsPage() {
     setDownloading(true)
     setDownloadProgress(0)
     try {
+      if (settings.serverJar) {
+        toast.info('Creating backup before upgrade...')
+        await window.api.backups.create()
+        toast.success('Backup created.')
+      }
+
       const build = settings.serverType === 'paper' ? settings.serverBuild :
                      settings.serverType === 'fabric' ? settings.serverBuild : undefined
       await window.api.versions.download(settings.serverType, settings.serverVersion, build)
-      toast.success('Server downloaded and EULA accepted!')
+      toast.success(settings.serverJar ? 'Server upgraded and EULA accepted!' : 'Server downloaded and EULA accepted!')
     } catch (err) {
       toast.error(`Download failed: ${err.message}`)
     }
@@ -198,6 +208,21 @@ function SettingsPage() {
       toast.error(err.message)
     }
   }
+
+  const parseRamToMb = (val) => {
+    if (!val) return 0
+    const str = val.toString().toUpperCase().trim()
+    const num = parseFloat(str)
+    if (isNaN(num)) return 0
+    if (str.includes('G')) return num * 1024
+    if (str.includes('M')) return num
+    return 0
+  }
+
+  const selectedJava = settings ? javaInstalls.find(j => j.path === settings.javaPath) : null
+  const is32Bit = selectedJava?.arch === '32-bit'
+  const isOverRamLimit = settings && (parseRamToMb(settings.xmx) > 1536 || parseRamToMb(settings.xms) > 1536)
+  const showRamWarning = is32Bit && isOverRamLimit
 
   if (!settings) {
     return (
@@ -314,7 +339,7 @@ function SettingsPage() {
                 onClick={handleDownload}
                 disabled={downloading || !settings.serverVersion}
               >
-                <Download size={14} /> {downloading ? 'Downloading...' : 'Download'}
+                <Download size={14} /> {downloading ? 'Downloading...' : (settings.serverJar ? 'Upgrade Server' : 'Download')}
               </button>
               {downloading && (
                 <div className="progress-bar w-full" style={{ width: 180, marginTop: 4 }}>
@@ -349,7 +374,7 @@ function SettingsPage() {
               <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8, fontWeight: 500 }}>Detected Java installations:</p>
               {javaInstalls.map((j, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderTop: i > 0 ? '1px solid rgba(48,54,61,0.3)' : 'none' }}>
-                  <span style={{ fontSize: 13, color: 'var(--text-primary)', wordBreak: 'break-all', paddingRight: '8px' }}>{j.version} — {j.path}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text-primary)', wordBreak: 'break-all', paddingRight: '8px' }}>Java {j.version} ({j.arch || 'unknown'}) — {j.path}</span>
                   <button className="btn btn-ghost btn-sm btn-premium" onClick={() => updateSetting('javaPath', j.path)} style={{ color: 'var(--accent)' }}>
                     Use
                   </button>
@@ -402,6 +427,13 @@ function SettingsPage() {
               <option value="8G">8 GB</option>
             </select>
           </div>
+
+          {showRamWarning && (
+            <div style={{ marginTop: 12, padding: '12px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: 8, border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertTriangle size={16} style={{ flexShrink: 0 }} />
+              <span>Warning: 32-bit Java cannot safely allocate more than ~1.5GB of RAM. The server will likely crash.</span>
+            </div>
+          )}
         </div>
 
         {/* Server Directory */}
