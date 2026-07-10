@@ -1706,16 +1706,3 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
-/* ── Light Theme Overrides ── */
-[data-theme="light"] {
-  --bg-primary: #f6f8fa;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f3f4f6;
-  
-  --border: #d0d7de;
-  --border-hover: #afb8c1;
-  
-  --accent: #9333ea;
-  --accent-hover: #a855f7;
-  --accent-subtle: rgba(147, 51, 234, 0.1);
-}

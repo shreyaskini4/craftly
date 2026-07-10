@@ -20,17 +20,19 @@ const useModStore = create((set, get) => ({
       searchResults: { hits: [], totalHits: 0 }
     })),
 
-  search: async (append = false) => {
-    const { searchQuery, filters, offset, limit } = get()
-    if (!searchQuery.trim() && !append) return
+  search: async (queryText = '', append = false) => {
+    set({ searchQuery: queryText })
+    const { filters, offset, limit } = get()
 
     set({ loading: true })
 
     try {
-      const results = await window.api.mods.search(searchQuery, {
+      const sortBy = !queryText.trim() ? 'downloads' : 'relevance'
+      const results = await window.api.mods.search(queryText, {
         ...filters,
         offset: append ? offset : 0,
-        limit
+        limit,
+        sortBy
       })
 
       if (append) {

@@ -53,7 +53,11 @@ export async function downloadVanillaServer(versionId, serverDir, onProgress) {
 export async function fetchPaperVersions() {
   try {
     const data = await fetchJson('https://fill.papermc.io/v3/projects/paper')
-    return data.versions || []
+    let versions = data.versions || []
+    if (versions && typeof versions === 'object' && !Array.isArray(versions)) {
+      return Object.values(versions).flat()
+    }
+    return versions
   } catch (err) {
     console.error('Failed to fetch Paper versions:', err.message)
     return []
@@ -72,8 +76,8 @@ export async function fetchPaperBuilds(version) {
 
 export async function downloadPaperServer(version, build, serverDir, onProgress) {
   const buildData = await fetchJson(`https://fill.papermc.io/v3/projects/paper/versions/${version}/builds/${build}`)
-  const filename = buildData.downloads.application.name
-  const url = `https://fill.papermc.io/v3/projects/paper/versions/${version}/builds/${build}/downloads/${filename}`
+  const dl = buildData.downloads['server:default'] || buildData.downloads.application
+  const url = dl.url || `https://fill.papermc.io/v3/projects/paper/versions/${version}/builds/${build}/downloads/${dl.name}`
   const destPath = path.join(serverDir, 'server.jar')
   fs.mkdirSync(serverDir, { recursive: true })
   await downloadFile(url, destPath, onProgress)
@@ -103,6 +107,11 @@ export async function fetchFabricLoaders(gameVersion) {
 }
 
 export async function downloadFabricServer(gameVersion, loaderVersion, serverDir, onProgress) {
+  if (!loaderVersion) {
+    const loaders = await fetchJson('https://meta.fabricmc.net/v2/versions/loader')
+    loaderVersion = loaders.find(l => l.stable)?.version || loaders[0]?.version
+  }
+
   const installers = await fetchJson('https://meta.fabricmc.net/v2/versions/installer')
   const installerVersion = installers.find(i => i.stable)?.version || '1.0.1'
   const url = `https://meta.fabricmc.net/v2/versions/loader/${gameVersion}/${loaderVersion}/${installerVersion}/server/jar`

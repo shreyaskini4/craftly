@@ -133,6 +133,12 @@ function ServerPropertiesPage() {
 
               {activeTab === 'Security/Admin' && (
                 <>
+                  {renderCheckbox('online-mode', 'Online Mode')}
+                  {(properties['online-mode'] === 'false' || properties['online-mode'] === false) && (
+                    <div style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '-0.5rem', marginBottom: '1rem' }}>
+                      ⚠️ <strong>Warning:</strong> Turning this off disables Mojang account verification, meaning unauthenticated users can join.
+                    </div>
+                  )}
                   {renderInput('player-idle-timeout', 'Player Idle Timeout (minutes)', 'number', '0', 0)}
                   {renderInput('op-permission-level', 'OP Permission Level', 'number', '4', 1, 4)}
                   {renderInput('function-permission-level', 'Function Permission Level', 'number', '2', 1, 4)}

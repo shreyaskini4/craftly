@@ -21,15 +21,24 @@ function ModsPage() {
   const [query, setQuery] = useState('')
   const [gameVersion, setGameVersion] = useState('')
   const [loader, setLoader] = useState('')
+  const [showSuggestions, setShowSuggestions] = useState(false)
 
   useEffect(() => {
     loadInstalled()
+    window.api.settings.get().then(s => {
+      if (s) {
+        if (s.serverVersion) setGameVersion(s.serverVersion)
+        if (['fabric', 'forge', 'quilt', 'paper'].includes(s.serverType)) {
+          setLoader(s.serverType)
+        }
+      }
+    }).catch(err => console.error('Failed to load settings', err))
   }, [])
 
   const handleSearch = useCallback(() => {
     const f = { gameVersion, loader }
     setFilters(f)
-    search(query, f)
+    search(query, false)
   }, [query, gameVersion, loader])
 
   useEffect(() => {
@@ -63,7 +72,7 @@ function ModsPage() {
   }
 
   const handleLoadMore = () => {
-    search(query, filters, searchResults.hits.length)
+    search(query, true)
   }
 
   const isInstalled = (projectId) => {
@@ -91,20 +100,72 @@ function ModsPage() {
       {activeTab === 'browse' && (
         <>
           <div className="flex flex-wrap gap-md" style={{ marginBottom: 'var(--space-md)' }}>
-            <div className="search-container" style={{ flex: 1, minWidth: 200 }}>
+            <div className="search-container" style={{ flex: 1, minWidth: 200, position: 'relative' }}>
               <Search size={16} className="search-icon" />
               <input
                 className="input search-input"
                 placeholder="Search mods..."
                 value={query}
-                onChange={e => setQuery(e.target.value)}
-                list="mod-suggestions"
+                onChange={e => {
+                  setQuery(e.target.value)
+                  setShowSuggestions(true)
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               />
-              <datalist id="mod-suggestions">
-                {searchResults.hits.map(hit => (
-                  <option key={hit.project_id} value={hit.title} />
-                ))}
-              </datalist>
+              {showSuggestions && searchResults.hits.length > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 8px)',
+                  left: 0,
+                  right: 0,
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  maxHeight: '320px',
+                  overflowY: 'auto',
+                  zIndex: 50,
+                  boxShadow: 'var(--shadow-lg)'
+                }}>
+                  {searchResults.hits.map(hit => (
+                    <div 
+                      key={hit.project_id} 
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '10px 14px',
+                        gap: '12px',
+                        cursor: 'pointer',
+                        borderBottom: '1px solid var(--border-subtle)',
+                        transition: 'background 0.2s ease'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--glass-bg-medium)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      onClick={() => {
+                        setQuery(hit.title)
+                        setShowSuggestions(false)
+                        handleSearch()
+                      }}
+                    >
+                      {hit.icon_url ? (
+                        <img src={hit.icon_url} alt={hit.title} style={{ width: 28, height: 28, borderRadius: 'var(--radius-sm)' }} />
+                      ) : (
+                        <div style={{ width: 28, height: 28, borderRadius: 'var(--radius-sm)', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Package size={16} style={{ color: 'var(--text-tertiary)' }} />
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '14px', fontWeight: 500 }}>
+                          {hit.title}
+                        </span>
+                      </div>
+                      <span className="badge badge-info" style={{ gap: '4px', fontSize: '12px' }}>
+                        <Download size={12} /> {formatDownloads(hit.downloads)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <select className="select" value={gameVersion} onChange={e => setGameVersion(e.target.value)} style={{ width: 150 }}>
               <option value="">Any Version</option>
@@ -139,6 +200,11 @@ function ModsPage() {
             </div>
           ) : (
             <>
+              {!query.trim() && (
+                <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>Most Used Mods</h2>
+                </div>
+              )}
               <div className="mod-grid">
                 {searchResults.hits.map(hit => (
                   <div key={hit.project_id} className="mod-card">

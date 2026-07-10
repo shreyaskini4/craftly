@@ -26,8 +26,7 @@ const defaults = {
   autoBackupInterval: 6,
   installedMods: [],
   onboardingComplete: false,
-  serverJar: '',
-  theme: 'dark'
+  serverJar: ''
 }
 
 const store = new Store({
