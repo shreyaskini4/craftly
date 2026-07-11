@@ -95,6 +95,15 @@
   --transition-fast: 150ms ease;
   --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: 300ms cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  /* ── Legacy Aliases & Global Tokens ── */
+  --accent: var(--color-primary);
+  --accent-hover: var(--color-primary-hover);
+  --accent-subtle: var(--color-primary-subtle);
+  
+  --border: var(--border-subtle);
+  --border-hover: var(--border-strong);
+  --transition: var(--transition-fast);
 }
 
 
