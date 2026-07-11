@@ -43,30 +43,37 @@ function ServerPropertiesPage() {
   }
 
   const renderInput = (key, label, type = 'text', placeholder = '', min, max) => (
-    <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 'var(--space-xs)', marginBottom: 'var(--space-md)' }}>
-      <label className="settings-label">{label}</label>
+    <div className="settings-row">
+      <div>
+        <label className="settings-label">{label}</label>
+      </div>
       <input
-        className="input w-full"
+        className="input"
         type={type}
         value={properties[key] !== undefined ? properties[key] : ''}
         onChange={e => handleChange(key, e.target.value)}
         placeholder={placeholder}
         min={min}
         max={max}
+        style={{ width: 320 }}
       />
     </div>
   )
 
   const renderCheckbox = (key, label) => (
-    <div className="settings-row" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
-      <input
-        type="checkbox"
-        id={`cb-${key}`}
-        checked={properties[key] === 'true' || properties[key] === true}
-        onChange={e => handleChange(key, e.target.checked.toString())}
-        style={{ cursor: 'pointer' }}
-      />
-      <label htmlFor={`cb-${key}`} className="settings-label" style={{ marginBottom: 0, cursor: 'pointer' }}>{label}</label>
+    <div className="settings-row">
+      <div>
+        <label className="settings-label">{label}</label>
+      </div>
+      <label className="toggle">
+        <input
+          type="checkbox"
+          id={`cb-${key}`}
+          checked={properties[key] === 'true' || properties[key] === true}
+          onChange={e => handleChange(key, e.target.checked.toString())}
+        />
+        <span className="toggle-slider" />
+      </label>
     </div>
   )
 
@@ -136,7 +143,7 @@ function ServerPropertiesPage() {
                   <>
                     {renderCheckbox('online-mode', 'Online Mode')}
                     {(properties['online-mode'] === 'false' || properties['online-mode'] === false) && (
-                      <div style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '-0.5rem', marginBottom: '1rem' }}>
+                      <div style={{ color: 'var(--color-danger)', fontSize: 'var(--font-sm)', marginTop: 'var(--space-xs)', marginBottom: 'var(--space-md)', background: 'var(--color-danger-subtle)', border: '1px solid rgba(244,63,94,0.3)', padding: 'var(--space-sm)', borderRadius: 'var(--radius-sm)' }}>
                         ⚠️ <strong>Warning:</strong> Turning this off disables Mojang account verification, meaning unauthenticated users can join.
                       </div>
                     )}

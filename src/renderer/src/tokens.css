@@ -69,12 +69,12 @@
   --space-2xl: 48px;
 
   /* ── Typography Scale ── */
-  --font-xs: 12px;
-  --font-sm: 13px;
-  --font-base: 14px;
-  --font-lg: 16px;
-  --font-xl: 20px;
-  --font-2xl: 28px;
+  --font-xs: 14px;
+  --font-sm: 16px;
+  --font-base: 18px;
+  --font-lg: 22px;
+  --font-xl: 26px;
+  --font-2xl: 34px;
   
   /* ── Radii ── */
   --radius-xs: 4px;

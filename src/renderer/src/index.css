@@ -163,7 +163,7 @@ body {
 }
 
 .sidebar-title {
-  font-size: 26px;
+  font-size: 36px;
   font-weight: normal;
   color: var(--text-primary);
   letter-spacing: 0.5px;
@@ -1697,19 +1697,7 @@ body {
   color: var(--warning);
 }
 
-/* ── Sidebar Brand (JSX-used names) ── */
-.sidebar-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.3px;
-}
 
-.sidebar-version {
-  font-size: 11px;
-  color: var(--text-tertiary);
-  font-weight: 500;
-}
 
 /* ── Status Dot Transitional ── */
 .status-dot.transitional {
@@ -1927,6 +1915,8 @@ body {
   image-rendering: pixelated;
   letter-spacing: 1.5px;
   text-transform: uppercase;
+  font-size: 1.3em;
+  display: inline-block;
 }
 
 .glow-text-primary {
