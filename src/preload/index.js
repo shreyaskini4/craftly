@@ -75,6 +75,16 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.on('monitoring:stats', handler)
       return handler
     },
+    monitorServerStatus: (callback) => {
+      const handler = (_event, status) => callback(status)
+      ipcRenderer.on('monitoring:server-status', handler)
+      return handler
+    },
+    monitorError: (callback) => {
+      const handler = (_event, msg) => callback(msg)
+      ipcRenderer.on('monitoring:error', handler)
+      return handler
+    },
     downloadProgress: (callback) => {
       const handler = (_event, progress) => callback(progress)
       ipcRenderer.on('download:progress', handler)
@@ -108,6 +118,20 @@ contextBridge.exposeInMainWorld('api', {
         ipcRenderer.removeListener('monitoring:stats', handler)
       } else {
         ipcRenderer.removeAllListeners('monitoring:stats')
+      }
+    },
+    monitorServerStatus: (handler) => {
+      if (handler) {
+        ipcRenderer.removeListener('monitoring:server-status', handler)
+      } else {
+        ipcRenderer.removeAllListeners('monitoring:server-status')
+      }
+    },
+    monitorError: (handler) => {
+      if (handler) {
+        ipcRenderer.removeListener('monitoring:error', handler)
+      } else {
+        ipcRenderer.removeAllListeners('monitoring:error')
       }
     },
     downloadProgress: (handler) => {

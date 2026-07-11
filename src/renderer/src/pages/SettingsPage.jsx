@@ -3,6 +3,7 @@ import { Download, FolderOpen, Search, Eye, EyeOff, RefreshCw, AlertTriangle } f
 import { toast } from 'sonner'
 import ImportServerModal from '../components/common/ImportServerModal'
 import useServerStore from '../stores/serverStore'
+import VersionPicker from '../components/common/VersionPicker'
 
 function SettingsPage() {
   const serverStatus = useServerStore(state => state.status)
@@ -52,7 +53,12 @@ function SettingsPage() {
 
     if (settings.serverType === 'paper') {
       window.api.versions.fetchPaperBuilds(settings.serverVersion)
-        .then(b => setBuilds(b))
+        .then(b => {
+          setBuilds(b)
+          if (b.length > 0 && (!isInitial || !settings.serverBuild)) {
+            updateSetting('serverBuild', String(b[b.length - 1]))
+          }
+        })
         .catch(err => toast.error(err.message))
     } else if (settings.serverType === 'fabric') {
       window.api.versions.fetchFabricLoaders(settings.serverVersion)
@@ -65,6 +71,12 @@ function SettingsPage() {
         .catch(err => toast.error(err.message))
     }
   }, [settings?.serverType, settings?.serverVersion])
+
+  useEffect(() => {
+    if (settings?.serverType) {
+      fetchVersions(settings.serverType)
+    }
+  }, [settings?.serverType])
 
   const loadSettings = async () => {
     try {
@@ -94,15 +106,15 @@ function SettingsPage() {
       switch (type || settings?.serverType) {
         case 'vanilla':
           result = await window.api.versions.fetchVanilla()
-          setVersions(result.map(v => v.id))
+          setVersions(result)
           break
         case 'paper':
           result = await window.api.versions.fetchPaper()
-          setVersions(result)
+          setVersions(result.reverse())
           break
         case 'fabric':
           result = await window.api.versions.fetchFabric()
-          setVersions(result.map(v => v.id))
+          setVersions(result)
           break
       }
       toast.success(`Found ${result.length} versions`)
@@ -276,7 +288,19 @@ function SettingsPage() {
             </select>
           </div>
 
-
+          <div className="settings-row">
+            <div>
+              <label className="settings-label">Server Version</label>
+              <p className="settings-description">Select Minecraft version</p>
+            </div>
+            <div style={{ width: 180 }}>
+              <VersionPicker
+                items={versions}
+                value={settings.serverVersion}
+                onChange={v => updateSetting('serverVersion', v)}
+              />
+            </div>
+          </div>
 
           {settings.serverType === 'paper' && builds.length > 0 && (
             <div className="settings-row">
@@ -284,15 +308,14 @@ function SettingsPage() {
                 <label className="settings-label">Build Number</label>
                 <p className="settings-description">Select a Paper build</p>
               </div>
-              <select
-                className="select"
-                value={settings.serverBuild}
-                onChange={e => updateSetting('serverBuild', e.target.value)}
-                style={{ width: 150 }}
-              >
-                <option value="">Latest</option>
-                {builds.slice(-10).reverse().map(b => <option key={b} value={b}>{b}</option>)}
-              </select>
+              <div style={{ width: 180 }}>
+                <VersionPicker
+                  items={builds.slice().reverse()}
+                  value={settings.serverBuild}
+                  onChange={v => updateSetting('serverBuild', v)}
+                  showFilters={false}
+                />
+              </div>
             </div>
           )}
 
@@ -302,15 +325,14 @@ function SettingsPage() {
                 <label className="settings-label">Loader Version</label>
                 <p className="settings-description">Select a Fabric loader</p>
               </div>
-              <select
-                className="select"
-                value={settings.serverBuild || ''}
-                onChange={e => updateSetting('serverBuild', e.target.value)}
-                style={{ width: 150 }}
-              >
-                <option value="">Select a loader...</option>
-                {loaders.map(l => <option key={l.version} value={l.version}>{l.version}</option>)}
-              </select>
+              <div style={{ width: 180 }}>
+                <VersionPicker
+                  items={loaders.map(l => ({ id: l.version, stable: l.stable }))}
+                  value={settings.serverBuild}
+                  onChange={v => updateSetting('serverBuild', v)}
+                  showFilters={false}
+                />
+              </div>
             </div>
           )}
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Search, Download, Trash2, Package, Check, Loader } from 'lucide-react'
+import { Search, Download, Trash2, Package, Check, Loader, RefreshCw, ArrowUpCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import useModStore from '../stores/modStore'
 
@@ -11,12 +11,15 @@ function formatDownloads(num) {
 
 function ModsPage() {
   const [activeTab, setActiveTab] = useState('browse')
-  const { searchResults, loading, installing, installedMods, filters } = useModStore()
+  const { searchResults, loading, installing, installedMods, filters, availableUpdates, checkingUpdates, updating } = useModStore()
   const search = useModStore(state => state.search)
   const install = useModStore(state => state.install)
   const uninstall = useModStore(state => state.uninstall)
   const loadInstalled = useModStore(state => state.loadInstalled)
   const setFilters = useModStore(state => state.setFilters)
+  const checkUpdates = useModStore(state => state.checkUpdates)
+  const updateMod = useModStore(state => state.updateMod)
+  const updateAll = useModStore(state => state.updateAll)
 
   const [query, setQuery] = useState('')
   const [gameVersion, setGameVersion] = useState('')
@@ -264,6 +267,88 @@ function ModsPage() {
 
       {activeTab === 'installed' && (
         <>
+          {/* Check for Updates button */}
+          {installedMods.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: 'var(--space-md)' }}>
+              <button
+                className="btn btn-outline btn-premium"
+                onClick={checkUpdates}
+                disabled={checkingUpdates}
+              >
+                {checkingUpdates ? (
+                  <><Loader size={14} className="spin" /> Checking...</>
+                ) : (
+                  <><RefreshCw size={14} /> Check for Updates</>
+                )}
+              </button>
+              {availableUpdates.length > 0 && (
+                <button
+                  className="btn btn-primary btn-premium"
+                  onClick={updateAll}
+                >
+                  <ArrowUpCircle size={14} /> Update All ({availableUpdates.length})
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Updates available banner */}
+          {availableUpdates.length > 0 && (
+            <div style={{
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--accent)',
+              borderRadius: 'var(--radius-md)',
+              padding: 'var(--space-md)',
+              marginBottom: 'var(--space-md)'
+            }}>
+              <h3 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ArrowUpCircle size={18} style={{ color: 'var(--accent)' }} />
+                {availableUpdates.length} update{availableUpdates.length !== 1 ? 's' : ''} available
+              </h3>
+              <div className="flex-col gap-sm">
+                {availableUpdates.map(mod => (
+                  <div key={mod.projectId} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 14px',
+                    background: 'var(--bg-tertiary)',
+                    borderRadius: 'var(--radius-sm)',
+                    gap: '12px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                      {mod.iconUrl ? (
+                        <img src={mod.iconUrl} alt={mod.title} style={{ width: 32, height: 32, borderRadius: 'var(--radius-sm)' }} />
+                      ) : (
+                        <div style={{ width: 32, height: 32, borderRadius: 'var(--radius-sm)', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Package size={16} style={{ color: 'var(--text-tertiary)' }} />
+                        </div>
+                      )}
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontWeight: 500, color: 'var(--text-primary)', fontSize: '14px' }}>{mod.title || mod.filename}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                          v{mod.versionNumber} → <span style={{ color: 'var(--accent)', fontWeight: 500 }}>v{mod.latestVersionNumber}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      className="btn btn-primary btn-sm btn-premium"
+                      onClick={() => updateMod(mod)}
+                      disabled={updating[mod.projectId]}
+                      style={{ flexShrink: 0 }}
+                    >
+                      {updating[mod.projectId] ? (
+                        <><Loader size={14} className="spin" /> Updating...</>
+                      ) : (
+                        <><ArrowUpCircle size={14} /> Update</>
+                      )}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {installedMods.length === 0 ? (
             <div className="empty-state">
               <Package size={48} style={{ marginBottom: 16, opacity: 0.3 }} />
@@ -271,29 +356,52 @@ function ModsPage() {
             </div>
           ) : (
             <div className="flex-col gap-sm">
-              {installedMods.map(mod => (
-                <div key={mod.filename} className="backup-item">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    {mod.iconUrl ? (
-                      <img src={mod.iconUrl} alt={mod.title} style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)' }} />
-                    ) : (
-                      <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Package size={20} style={{ color: 'var(--text-tertiary)' }} />
+              {installedMods.map(mod => {
+                const updateAvailable = availableUpdates.find(u => u.projectId === mod.projectId)
+                return (
+                  <div key={mod.filename} className="backup-item">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      {mod.iconUrl ? (
+                        <img src={mod.iconUrl} alt={mod.title} style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)' }} />
+                      ) : (
+                        <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Package size={20} style={{ color: 'var(--text-tertiary)' }} />
+                        </div>
+                      )}
+                      <div className="backup-info">
+                        <span className="backup-name">{mod.title || mod.filename}</span>
+                        <span className="backup-meta">
+                          {mod.versionNumber && <span className="badge badge-info" style={{ padding: '1px 6px', fontSize: '11px' }}>v{mod.versionNumber}</span>}
+                          {updateAvailable && (
+                            <span className="badge badge-success" style={{ padding: '1px 6px', fontSize: '11px', background: 'rgba(63, 185, 80, 0.15)', color: 'var(--success)' }}>
+                              → v{updateAvailable.latestVersionNumber}
+                            </span>
+                          )}
+                          <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>{mod.filename}</span>
+                        </span>
                       </div>
-                    )}
-                    <div className="backup-info">
-                      <span className="backup-name">{mod.title || mod.filename}</span>
-                      <span className="backup-meta">
-                        {mod.versionNumber && <span className="badge badge-info" style={{ padding: '1px 6px', fontSize: '11px' }}>v{mod.versionNumber}</span>}
-                        <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>{mod.filename}</span>
-                      </span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      {updateAvailable && (
+                        <button
+                          className="btn btn-primary btn-sm btn-premium"
+                          onClick={() => updateMod(updateAvailable)}
+                          disabled={updating[mod.projectId]}
+                        >
+                          {updating[mod.projectId] ? (
+                            <><Loader size={14} className="spin" /> Updating...</>
+                          ) : (
+                            <><ArrowUpCircle size={14} /> Update</>
+                          )}
+                        </button>
+                      )}
+                      <button className="btn btn-danger btn-sm btn-premium" onClick={() => handleUninstall(mod.filename, mod.title)}>
+                        <Trash2 size={14} /> Uninstall
+                      </button>
                     </div>
                   </div>
-                  <button className="btn btn-danger btn-sm btn-premium" onClick={() => handleUninstall(mod.filename, mod.title)}>
-                    <Trash2 size={14} /> Uninstall
-                  </button>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </>

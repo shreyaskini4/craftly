@@ -19,6 +19,7 @@
     "extract-zip": "^2.0.1",
     "lucide-react": "^0.511.0",
     "minecraft-server-util": "^5.4.2",
+    "pidusage": "^4.0.1",
     "rcon-client": "^4.2.4",
     "recharts": "^2.15.3",
     "sonner": "^2.0.4",

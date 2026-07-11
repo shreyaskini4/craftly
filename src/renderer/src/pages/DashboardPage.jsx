@@ -18,7 +18,7 @@ function formatUptime(ms) {
 
 function DashboardPage({ onNavigate }) {
   const { status, startTime } = useServerStore()
-  const { cpuHistory, ramHistory, currentCpu, currentRam, players, tps } = useMonitorStore()
+  const { cpuHistory, ramHistory, currentCpu, currentRam, players, tps, monitorError } = useMonitorStore()
   const initMonitorListeners = useMonitorStore(state => state.initListeners)
   const [uptime, setUptime] = useState(0)
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
@@ -201,26 +201,30 @@ function DashboardPage({ onNavigate }) {
 
   return (
     <div className="slide-up">
-      <div className="hero-header" style={{ padding: '48px 32px', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9))', borderRadius: '24px', marginBottom: '32px', border: '1px solid var(--border-subtle)', boxShadow: '0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '-50%', left: '-10%', width: '60%', height: '200%', background: 'radial-gradient(ellipse at center, rgba(34, 197, 94, 0.15) 0%, transparent 70%)', pointerEvents: 'none' }}></div>
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <h1 style={{ fontSize: '56px', fontWeight: 800, letterSpacing: '-1.5px', margin: 0, background: 'linear-gradient(to right, #ffffff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.1 }}>
+      {monitorError && (
+        <div style={{ background: 'var(--color-danger)', color: '#fff', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-md)', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 500 }}>
+          <span>⚠️</span> <span><strong>Monitoring Error:</strong> {monitorError}</span>
+        </div>
+      )}
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+        <div>
+          <h1 style={{ fontSize: 'var(--font-2xl)', fontWeight: 700, margin: 0, lineHeight: 1.2, color: 'var(--text-primary)' }}>
             Dashboard
           </h1>
-          <p style={{ fontSize: '18px', color: 'var(--text-secondary)', marginTop: '12px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%', background: isOnline ? 'var(--color-success)' : 'var(--text-tertiary)', boxShadow: isOnline ? '0 0 10px var(--color-success)' : 'none' }}></span>
+          <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)', marginTop: 'var(--space-xs)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: isOnline ? 'var(--color-success)' : 'var(--text-tertiary)', boxShadow: isOnline ? '0 0 8px var(--color-success)' : 'none' }}></span>
             Server is currently {isOnline ? 'online' : 'offline'}
           </p>
         </div>
-        <div className="flex gap-lg items-center" style={{ position: 'relative', zIndex: 1 }}>
+        <div className="flex gap-md items-center">
           {settings && (
-            <div className="flex gap-sm items-center" style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)' }}>
-              <div style={{ padding: '0 12px', color: 'var(--text-secondary)', fontSize: '14px', fontWeight: 600 }}>Version</div>
+            <div className="flex gap-sm items-center" style={{ background: 'var(--bg-elevated)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-xs)', fontWeight: 600 }}>Version</div>
               <select
                 className="select"
                 value={settings.serverVersion || ''}
                 onChange={e => updateSetting('serverVersion', e.target.value)}
-                style={{ width: 180, background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', fontWeight: 600, fontSize: '15px', borderRadius: '10px' }}
+                style={{ width: 140, background: 'transparent', border: 'none', padding: 0, fontWeight: 500, fontSize: 'var(--font-sm)', paddingRight: '20px', boxShadow: 'none' }}
                 onClick={() => { if(versions.length === 0) fetchVersions() }}
               >
                 <option value="">{settings.serverVersion || 'Select version'}</option>
@@ -230,20 +234,12 @@ function DashboardPage({ onNavigate }) {
           )}
 
           {isOffline ? (
-            <button onClick={handleStart} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', background: 'linear-gradient(to bottom, #22c55e, #16a34a)', color: '#fff', fontSize: '24px', fontWeight: 900, padding: '18px 40px', borderRadius: '16px', border: 'none', boxShadow: '0 8px 0 #14532d, 0 20px 25px rgba(22,163,74,0.5)', transform: 'translateY(-4px)', transition: 'all 0.1s', textTransform: 'uppercase', letterSpacing: '2px' }}
-              onMouseDown={e => { e.currentTarget.style.transform = 'translateY(4px)'; e.currentTarget.style.boxShadow = '0 0 0 #14532d, 0 10px 15px rgba(22,163,74,0.5)' }}
-              onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 0 #14532d, 0 20px 25px rgba(22,163,74,0.5)' }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 0 #14532d, 0 20px 25px rgba(22,163,74,0.5)' }}
-            >
-              <Play size={28} style={{ fill: '#fff' }} /> PLAY
+            <button className="btn btn-success" onClick={handleStart} style={{ padding: '8px 20px', fontWeight: 600 }}>
+              <Play size={18} /> Start
             </button>
           ) : (
-            <button onClick={handleStop} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', background: 'linear-gradient(to bottom, #ef4444, #dc2626)', color: '#fff', fontSize: '24px', fontWeight: 900, padding: '18px 40px', borderRadius: '16px', border: 'none', boxShadow: '0 8px 0 #7f1d1d, 0 20px 25px rgba(220,38,38,0.5)', transform: 'translateY(-4px)', transition: 'all 0.1s', textTransform: 'uppercase', letterSpacing: '2px' }}
-              onMouseDown={e => { e.currentTarget.style.transform = 'translateY(4px)'; e.currentTarget.style.boxShadow = '0 0 0 #7f1d1d, 0 10px 15px rgba(220,38,38,0.5)' }}
-              onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 0 #7f1d1d, 0 20px 25px rgba(220,38,38,0.5)' }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 0 #7f1d1d, 0 20px 25px rgba(220,38,38,0.5)' }}
-            >
-              <Square size={28} style={{ fill: '#fff' }} /> STOP
+            <button className="btn btn-danger" onClick={handleStop} style={{ padding: '8px 20px', fontWeight: 600 }}>
+              <Square size={18} /> Stop
             </button>
           )}
         </div>

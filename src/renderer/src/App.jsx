@@ -40,7 +40,7 @@ function App() {
 
   if (!settings.onboardingComplete) {
     return (
-      <div className="app-layout" style={{ display: 'block' }}>
+      <div className="app-layout" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
         <WelcomePage onComplete={() => setSettings(prev => ({ ...prev, onboardingComplete: true }))} />
         <Toaster theme="dark" position="bottom-right" richColors closeButton />
       </div>

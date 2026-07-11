@@ -28,9 +28,7 @@ function fetchJson(url) {
 
 export async function fetchVanillaVersions() {
   const manifest = await fetchJson('https://launchermeta.mojang.com/mc/game/version_manifest.json')
-  return manifest.versions
-    .filter(v => v.type === 'release')
-    .map(v => ({ id: v.id, type: v.type, releaseTime: v.releaseTime }))
+  return manifest.versions.map(v => ({ id: v.id, type: v.type, releaseTime: v.releaseTime }))
 }
 
 export async function downloadVanillaServer(versionId, serverDir, onProgress) {
@@ -67,7 +65,9 @@ export async function fetchPaperVersions() {
 export async function fetchPaperBuilds(version) {
   try {
     const data = await fetchJson(`https://fill.papermc.io/v3/projects/paper/versions/${version}`)
-    return data.builds || []
+    const builds = data.builds || []
+    // Normalize: if the API returns objects (e.g. { build: 123, ... }), extract the number
+    return builds.map(b => (typeof b === 'object' && b !== null && b.build != null) ? b.build : b)
   } catch (err) {
     console.error('Failed to fetch Paper builds:', err.message)
     return []
@@ -75,6 +75,9 @@ export async function fetchPaperBuilds(version) {
 }
 
 export async function downloadPaperServer(version, build, serverDir, onProgress) {
+  if (!build) {
+    throw new Error('No Paper build selected. Please select a build number before downloading.')
+  }
   const buildData = await fetchJson(`https://fill.papermc.io/v3/projects/paper/versions/${version}/builds/${build}`)
   const dl = buildData.downloads['server:default'] || buildData.downloads.application
   const url = dl.url || `https://fill.papermc.io/v3/projects/paper/versions/${version}/builds/${build}/downloads/${dl.name}`

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { FolderOpen, Search, Download, CheckCircle, Plus, UploadCloud, ChevronRight, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import ImportServerModal from '../components/common/ImportServerModal'
+import VersionPicker from '../components/common/VersionPicker'
 
 function WelcomePage({ onComplete }) {
   const [mode, setMode] = useState(null)
@@ -95,13 +96,13 @@ function WelcomePage({ onComplete }) {
       let result = []
       if (type === 'vanilla') {
         result = await window.api.versions.fetchVanilla()
-        setVersions(result.map(v => v.id))
+        setVersions(result)
       } else if (type === 'paper') {
         result = await window.api.versions.fetchPaper()
-        setVersions(result)
+        setVersions(result.reverse()) // Paper returns oldest first
       } else if (type === 'fabric') {
         result = await window.api.versions.fetchFabric()
-        setVersions(result.map(v => v.id))
+        setVersions(result)
       }
     } catch (err) {
       toast.error(`Failed to fetch versions: ${err.message}`)
@@ -237,10 +238,13 @@ function WelcomePage({ onComplete }) {
 
             <div className="settings-row">
               <label className="settings-label">Version</label>
-              <select className="select" value={serverVersion} onChange={(e) => setServerVersion(e.target.value)}>
-                <option value="">Select a version</option>
-                {versions.map(v => <option key={v} value={v}>{v}</option>)}
-              </select>
+              <div style={{ width: 250 }}>
+                <VersionPicker 
+                  items={versions} 
+                  value={serverVersion} 
+                  onChange={setServerVersion} 
+                />
+              </div>
             </div>
 
             <div className="flex-col gap-sm mt-md">

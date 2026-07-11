@@ -13,15 +13,26 @@ export function registerMonitoringIpc(mainWindow) {
     if (pid) {
       monitorService.startMonitoring(pid)
 
-      // Forward stats to renderer
       monitorService.removeAllListeners('stats')
+      monitorService.removeAllListeners('monitor-error')
+      monitorService.removeAllListeners('monitor-unavailable')
+
       monitorService.on('stats', (stats) => {
         if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.webContents.send('monitoring:stats', stats)
         }
       })
+      monitorService.on('monitor-error', (msg) => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('monitoring:error', `Monitoring read failed: ${msg}`)
+        }
+      })
+      monitorService.on('monitor-unavailable', (msg) => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('monitoring:error', `Monitoring stopped: ${msg}`)
+        }
+      })
 
-      // Start polling server status and TPS
       startStatusPolling(mainWindow)
 
       // Try to connect RCON after a delay
@@ -73,13 +84,8 @@ function startStatusPolling(mainWindow) {
       if (rconManager.isConnected) {
         tps = await rconManager.getTps()
       }
-
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('monitoring:stats', {
-          ...serverStatus,
-          tps,
-          type: 'server-status'
-        })
+        mainWindow.webContents.send('monitoring:server-status', { ...serverStatus, tps })
       }
     } catch { /* ignore polling errors */ }
   }, 5000)

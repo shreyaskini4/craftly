@@ -1,13 +1,8 @@
 import { EventEmitter } from 'events'
 import os from 'os'
+import pidusage from 'pidusage'
 
-let si = null
 let mcUtil = null
-
-async function loadSi() {
-  if (!si) si = await import('systeminformation')
-  return si.default || si
-}
 
 async function loadMcUtil() {
   if (!mcUtil) mcUtil = await import('minecraft-server-util')
@@ -24,25 +19,28 @@ class MonitorService extends EventEmitter {
   startMonitoring(pid) {
     this.stopMonitoring()
     this.pid = pid
+    this.failCount = 0
 
     this.interval = setInterval(async () => {
       try {
-        const sysinfo = await loadSi()
-        const procs = await sysinfo.processes()
-        const proc = procs.list.find(p => p.pid === this.pid)
-
-        if (proc) {
-          this.emit('stats', {
-            cpu: Math.round((proc.cpu / os.cpus().length) * 10) / 10,
-            ram: {
-              used: Math.round(proc.memRss / 1024), // MB
-              percent: Math.round((proc.memRss * 1024) / os.totalmem() * 100 * 10) / 10
-            },
-            timestamp: Date.now()
-          })
-        }
+        const stats = await pidusage(this.pid)
+        this.failCount = 0
+        this.emit('stats', {
+          cpu: Math.round((stats.cpu / os.cpus().length) * 10) / 10,
+          ram: {
+            used: Math.round(stats.memory / 1024 / 1024),
+            percent: Math.round((stats.memory / os.totalmem()) * 100 * 10) / 10
+          },
+          timestamp: Date.now()
+        })
       } catch (err) {
+        this.failCount++
         console.error('Monitoring query failed:', err.message)
+        this.emit('monitor-error', err.message)
+        if (this.failCount >= 3) {
+          this.emit('monitor-unavailable', err.message)
+          this.stopMonitoring()
+        }
       }
     }, 2000)
   }

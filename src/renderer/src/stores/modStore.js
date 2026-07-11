@@ -10,6 +10,9 @@ const useModStore = create((set, get) => ({
   loading: false,
   offset: 0,
   limit: 20,
+  availableUpdates: [],
+  checkingUpdates: false,
+  updating: {},
 
   setQuery: (query) => set({ searchQuery: query }),
 
@@ -96,6 +99,55 @@ const useModStore = create((set, get) => ({
       set({ installedMods: mods || [] })
     } catch (err) {
       console.error('Failed to load installed mods:', err)
+    }
+  },
+
+  checkUpdates: async () => {
+    set({ checkingUpdates: true, availableUpdates: [] })
+    try {
+      const updates = await window.api.mods.checkUpdates()
+      set({ availableUpdates: updates || [], checkingUpdates: false })
+      return updates || []
+    } catch (err) {
+      toast.error('Failed to check for updates: ' + (err.message || err))
+      set({ checkingUpdates: false })
+      return []
+    }
+  },
+
+  updateMod: async (mod) => {
+    set((state) => ({
+      updating: { ...state.updating, [mod.projectId]: true }
+    }))
+    try {
+      // Uninstall old version first to avoid duplicate jars
+      await window.api.mods.uninstall(mod.filename)
+      // Install the new version
+      await window.api.mods.install(mod.projectId, mod.latestVersionId)
+      // Refresh installed list
+      const installed = await window.api.mods.getInstalled()
+      set((state) => ({
+        updating: { ...state.updating, [mod.projectId]: false },
+        installedMods: installed || [],
+        availableUpdates: state.availableUpdates.filter(
+          (u) => u.projectId !== mod.projectId
+        )
+      }))
+      toast.success(`${mod.title || mod.filename} updated!`)
+    } catch (err) {
+      set((state) => ({
+        updating: { ...state.updating, [mod.projectId]: false }
+      }))
+      toast.error(
+        `Failed to update ${mod.title || mod.filename}: ${err.message || err}`
+      )
+    }
+  },
+
+  updateAll: async () => {
+    const { availableUpdates, updateMod } = get()
+    for (const mod of availableUpdates) {
+      await updateMod(mod)
     }
   }
 }))
