@@ -50,12 +50,11 @@ export async function downloadVanillaServer(versionId, serverDir, onProgress) {
 
 export async function fetchPaperVersions() {
   try {
-    const data = await fetchJson('https://fill.papermc.io/v3/projects/paper')
-    let versions = data.versions || []
-    if (versions && typeof versions === 'object' && !Array.isArray(versions)) {
-      return Object.values(versions).flat()
+    const data = await fetchJson('https://mcutils.com/api/server-jars/paper')
+    if (Array.isArray(data)) {
+      return data.map(d => d.version)
     }
-    return versions
+    return []
   } catch (err) {
     console.error('Failed to fetch Paper versions:', err.message)
     return []
@@ -63,26 +62,17 @@ export async function fetchPaperVersions() {
 }
 
 export async function fetchPaperBuilds(version) {
-  try {
-    const data = await fetchJson(`https://fill.papermc.io/v3/projects/paper/versions/${version}`)
-    const builds = data.builds || []
-    // Normalize: if the API returns objects (e.g. { build: 123, ... }), extract the number
-    return builds.map(b => (typeof b === 'object' && b !== null && b.build != null) ? b.build : b)
-  } catch (err) {
-    console.error('Failed to fetch Paper builds:', err.message)
-    return []
-  }
+  // mcutils abstracts away builds and always provides the latest build for a given version.
+  return ['latest']
 }
 
 export async function downloadPaperServer(version, build, serverDir, onProgress) {
-  if (!build) {
-    throw new Error('No Paper build selected. Please select a build number before downloading.')
-  }
-  const buildData = await fetchJson(`https://fill.papermc.io/v3/projects/paper/versions/${version}/builds/${build}`)
-  const dl = buildData.downloads['server:default'] || buildData.downloads.application
-  const url = dl.url || `https://fill.papermc.io/v3/projects/paper/versions/${version}/builds/${build}/downloads/${dl.name}`
+  // We use the mcutils download endpoint, ignoring the specific build string (since it's 'latest')
+  const url = `https://mcutils.com/api/server-jars/paper/${version.toLowerCase()}/download`
   const destPath = path.join(serverDir, 'server.jar')
   fs.mkdirSync(serverDir, { recursive: true })
+  
+  // downloadFile now handles User-Agent spoofing and redirects natively.
   await downloadFile(url, destPath, onProgress)
   return destPath
 }

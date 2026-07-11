@@ -23,29 +23,42 @@ export function downloadFile(url, destPath, onProgress = null, maxRedirects = 5)
       return reject(new Error(`Failed to create directory for ${destPath}: ${err.message}`))
     }
 
-    const attemptDownload = (currentUrl, redirectsLeft) => {
+    const attemptDownload = (currentUrl, redirectsLeft, retriesLeft = 3) => {
       const parsedUrl = new URL(currentUrl)
       const client = parsedUrl.protocol === 'https:' ? https : http
 
       const tempPath = destPath + '.downloading'
       
-      // Helper to remove partial file on failure
       const cleanupPartial = () => {
         try { if (existsSync(tempPath)) unlinkSync(tempPath) } catch { /* ignore */ }
       }
 
-      const request = client.get(currentUrl, (response) => {
+      const request = client.get(currentUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+        }
+      }, (response) => {
         const { statusCode, headers } = response
 
         // Handle redirects (301, 302, 303, 307, 308)
         if (statusCode >= 300 && statusCode < 400 && headers.location) {
-          response.resume() // Consume the response to free memory
+          response.resume() 
           if (redirectsLeft <= 0) {
             return reject(new Error(`Too many redirects (max ${maxRedirects}) for ${url}`))
           }
-          // Resolve relative redirect URLs
           const redirectUrl = new URL(headers.location, currentUrl).toString()
-          return attemptDownload(redirectUrl, redirectsLeft - 1)
+          return attemptDownload(redirectUrl, redirectsLeft - 1, retriesLeft)
+        }
+
+        // Handle 5xx errors with retry and backoff
+        if (statusCode >= 500 && statusCode < 600) {
+          response.resume()
+          if (retriesLeft > 0) {
+            cleanupPartial()
+            const delay = Math.pow(2, 3 - retriesLeft) * 1000
+            setTimeout(() => attemptDownload(currentUrl, redirectsLeft, retriesLeft - 1), delay)
+            return
+          }
         }
 
         if (statusCode !== 200) {
@@ -60,11 +73,13 @@ export function downloadFile(url, destPath, onProgress = null, maxRedirects = 5)
 
         response.on('data', (chunk) => {
           downloadedBytes += chunk.length
-          if (onProgress && totalBytes > 0) {
+          if (onProgress) {
+            // Mock progress if no content length
+            const mockTotal = totalBytes > 0 ? totalBytes : (downloadedBytes + (1024 * 1024))
             onProgress({
               downloaded: downloadedBytes,
-              total: totalBytes,
-              percent: Math.round((downloadedBytes / totalBytes) * 100)
+              total: mockTotal,
+              percent: totalBytes > 0 ? Math.round((downloadedBytes / totalBytes) * 100) : 0
             })
           }
         })
@@ -92,19 +107,34 @@ export function downloadFile(url, destPath, onProgress = null, maxRedirects = 5)
         response.on('error', (err) => {
           fileStream.close()
           cleanupPartial()
-          reject(new Error(`Download stream error: ${err.message}`))
+          if (retriesLeft > 0) {
+            const delay = Math.pow(2, 3 - retriesLeft) * 1000
+            setTimeout(() => attemptDownload(currentUrl, redirectsLeft, retriesLeft - 1), delay)
+          } else {
+            reject(new Error(`Download stream error: ${err.message}`))
+          }
         })
       })
 
       request.on('error', (err) => {
         cleanupPartial()
-        reject(new Error(`Network error downloading ${currentUrl}: ${err.message}`))
+        if (retriesLeft > 0) {
+          const delay = Math.pow(2, 3 - retriesLeft) * 1000
+          setTimeout(() => attemptDownload(currentUrl, redirectsLeft, retriesLeft - 1), delay)
+        } else {
+          reject(new Error(`Network error downloading ${currentUrl}: ${err.message}`))
+        }
       })
 
       request.setTimeout(30000, () => {
         request.destroy()
         cleanupPartial()
-        reject(new Error(`Download timed out: ${currentUrl}`))
+        if (retriesLeft > 0) {
+          const delay = Math.pow(2, 3 - retriesLeft) * 1000
+          setTimeout(() => attemptDownload(currentUrl, redirectsLeft, retriesLeft - 1), delay)
+        } else {
+          reject(new Error(`Download timed out: ${currentUrl}`))
+        }
       })
     }
 
@@ -131,7 +161,7 @@ export function fetchJson(url, headers = {}) {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'User-Agent': 'craftly/1.0.0',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
         ...headers
       }
     }

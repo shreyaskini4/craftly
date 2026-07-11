@@ -298,10 +298,10 @@ function DashboardPage({ onNavigate }) {
             <div className="card-header">
               <span className="card-title"><div className="icon-chip primary"><MemoryStick size={16} /></div>RAM Usage</span>
             </div>
-            <div className="card-value">{currentRam.used}<span style={{ fontSize: 'var(--font-base)', color: 'var(--text-tertiary)' }}> MB</span></div>
+            <div className="card-value">{currentRam.used}</div>
             <div className="chart-container" style={{ marginTop: 'auto', paddingTop: 'var(--space-md)', flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: '80px' }}>
               <ResponsiveContainer width="100%" height="100%" style={{ flexGrow: 1 }}>
-                <AreaChart data={ramHistory} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <AreaChart data={ramHistory.map(d => ({ ...d, numericValue: parseFloat(d.value) || 0 }))} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="ramGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.35} />
@@ -310,8 +310,8 @@ function DashboardPage({ onNavigate }) {
                   </defs>
                   <XAxis dataKey="time" hide />
                   <YAxis hide />
-                  <Tooltip contentStyle={chartTooltipStyle} className="custom-chart-tooltip" formatter={(v) => [`${v} MB`, 'RAM']} />
-                  <Area type="monotone" dataKey="value" stroke="var(--color-primary)" fill="url(#ramGradient)" strokeWidth={2} dot={false} />
+                  <Tooltip contentStyle={chartTooltipStyle} className="custom-chart-tooltip" formatter={(v) => [`${v} GB`, 'RAM']} />
+                  <Area type="monotone" dataKey="numericValue" stroke="var(--color-primary)" fill="url(#ramGradient)" strokeWidth={2} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

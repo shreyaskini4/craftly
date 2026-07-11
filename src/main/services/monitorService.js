@@ -1,6 +1,17 @@
 import { EventEmitter } from 'events'
 import os from 'os'
 import pidusage from 'pidusage'
+import pidtree from 'pidtree'
+import serverProcess from './serverProcess.js'
+
+function parseXmxToGB(xmxStr) {
+  if (!xmxStr) return 4.0;
+  const match = xmxStr.match(/^(\d+)([gmGM])$/);
+  if (!match) return 4.0;
+  const val = parseFloat(match[1]);
+  const unit = match[2].toUpperCase();
+  return unit === 'G' ? val : val / 1024;
+}
 
 let mcUtil = null
 
@@ -20,16 +31,40 @@ class MonitorService extends EventEmitter {
     this.stopMonitoring()
     this.pid = pid
     this.failCount = 0
+    
+    const maxGb = parseXmxToGB(serverProcess.lastConfig?.xmx)
 
     this.interval = setInterval(async () => {
       try {
-        const stats = await pidusage(this.pid)
+        let pids = [this.pid]
+        try {
+          const children = await pidtree(this.pid)
+          if (children && children.length > 0) pids = pids.concat(children)
+        } catch (e) { /* ignore */ }
+
+        let maxMem = 0
+        let maxCpu = 0
+
+        for (const p of pids) {
+          try {
+            const stat = await pidusage(p)
+            if (stat && stat.memory > maxMem) {
+              maxMem = stat.memory
+              maxCpu = stat.cpu
+            }
+          } catch (e) { /* ignore dead processes */ }
+        }
+
+        if (maxMem === 0) throw new Error('No active processes found')
+
+        const usedGb = maxMem / (1024 * 1024 * 1024)
+
         this.failCount = 0
         this.emit('stats', {
-          cpu: Math.round((stats.cpu / os.cpus().length) * 10) / 10,
+          cpu: Math.round((maxCpu / os.cpus().length) * 10) / 10,
           ram: {
-            used: Math.round(stats.memory / 1024 / 1024),
-            percent: Math.round((stats.memory / os.totalmem()) * 100 * 10) / 10
+            used: `${usedGb.toFixed(1)}/${maxGb.toFixed(1)} GB`,
+            percent: Math.round((maxMem / os.totalmem()) * 100 * 10) / 10
           },
           timestamp: Date.now()
         })
