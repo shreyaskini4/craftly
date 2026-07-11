@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
-import { AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { Play, Square, RotateCcw, Users, Cpu, MemoryStick, Activity, ArrowRight, Archive, Settings } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { Play, Square, RotateCcw, Users, Cpu, MemoryStick, Activity, ArrowRight, Archive } from 'lucide-react'
 import { toast } from 'sonner'
 import useServerStore from '../stores/serverStore'
 import useMonitorStore from '../stores/monitorStore'
@@ -154,6 +154,17 @@ function DashboardPage({ onNavigate }) {
     tpsValue >= 18 ? 'success' :
     tpsValue >= 15 ? 'warning' : 'danger'
 
+  // Recharts evaluates functional domains while the history is empty. A
+  // numeric fallback prevents an initial NaN axis from taking down the page.
+  const ramDomain = useMemo(() => {
+    const values = ramHistory.map(point => point.value).filter(Number.isFinite)
+    if (values.length === 0) return [0, 1]
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const padding = Math.max(0.1, max * 0.1)
+    return [Math.max(0, min - padding), max + padding]
+  }, [ramHistory])
+
   const chartTooltipStyle = {
     backgroundColor: '#000000',
     border: '1px solid rgba(147, 51, 234, 0.4)',
@@ -213,10 +224,6 @@ function DashboardPage({ onNavigate }) {
           <h1 style={{ fontSize: 'var(--font-2xl)', fontWeight: 700, margin: 0, lineHeight: 1.2, color: 'var(--text-primary)' }}>
             Dashboard
           </h1>
-          <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)', marginTop: 'var(--space-xs)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: isOnline ? 'var(--color-success)' : 'var(--text-tertiary)', boxShadow: isOnline ? '0 0 8px var(--color-success)' : 'none' }}></span>
-            Server is currently {isOnline ? 'online' : 'offline'}
-          </p>
         </div>
         <div className="flex gap-md items-center">
           {settings && (
@@ -255,15 +262,11 @@ function DashboardPage({ onNavigate }) {
               <span className="card-title text-pixel">Server Status</span>
               <StatusBadge status={status} />
             </div>
-            <div className={`card-value text-pixel ${
+            <div className={`card-value uptime-value ${
               status === 'online' ? 'glow-text-success' :
               status === 'offline' ? 'glow-text-danger' : 'glow-text-warning'
             }`}>{formatUptime(uptime)}</div>
             <p className="card-subtitle">Uptime</p>
-          </div>
-          <div className="card-info-bar">
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div className={`status-dot ${status}`}></div> {status.toUpperCase()}</span>
-            <span style={{ color: 'var(--text-tertiary)' }}><Settings size={14} /></span>
           </div>
         </div>
 
@@ -306,7 +309,7 @@ function DashboardPage({ onNavigate }) {
             <div className="card-value text-pixel glow-text-primary">{currentRam.used}</div>
             <div className="chart-container" style={{ marginTop: 'auto', paddingTop: 'var(--space-md)', flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: '80px' }}>
               <ResponsiveContainer width="100%" height="100%" style={{ flexGrow: 1 }}>
-                <AreaChart data={ramHistory.map(d => ({ ...d, numericValue: parseFloat(d.value) || 0 }))} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                <AreaChart data={ramHistory} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <defs>
                     <linearGradient id="ramGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.6} />
@@ -315,9 +318,9 @@ function DashboardPage({ onNavigate }) {
                   </defs>
                   <CartesianGrid stroke="rgba(147, 51, 234, 0.08)" strokeDasharray="3 3" />
                   <XAxis dataKey="time" hide />
-                  <YAxis hide />
-                  <Tooltip contentStyle={chartTooltipStyle} className="custom-chart-tooltip" formatter={(v) => [`${v} GB`, 'RAM']} />
-                  <Area type="monotone" dataKey="numericValue" stroke="var(--color-primary)" fill="url(#ramGradient)" strokeWidth={2.5} dot={false} />
+                  <YAxis hide domain={ramDomain} />
+                  <Tooltip contentStyle={chartTooltipStyle} className="custom-chart-tooltip" formatter={(v) => [`${Number(v).toFixed(2)} GB`, 'RAM']} />
+                  <Area type="monotone" dataKey="value" stroke="var(--color-primary)" fill="url(#ramGradient)" strokeWidth={2} dot={false} isAnimationActive animationDuration={300} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -347,7 +350,7 @@ function DashboardPage({ onNavigate }) {
                   <XAxis dataKey="time" hide />
                   <YAxis hide domain={[0, 100]} />
                   <Tooltip contentStyle={chartTooltipStyle} className="custom-chart-tooltip" formatter={(v) => [`${v}%`, 'CPU']} />
-                  <Area type="monotone" dataKey="value" stroke="var(--color-success)" fill="url(#cpuGradient)" strokeWidth={2.5} dot={false} />
+                  <Area type="monotone" dataKey="value" stroke="var(--color-success)" fill="url(#cpuGradient)" strokeWidth={2} dot={false} isAnimationActive animationDuration={300} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

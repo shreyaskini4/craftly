@@ -5,14 +5,13 @@ import serverProcess from '../services/serverProcess.js'
 import settingsStore from '../services/settingsStore.js'
 
 let statusInterval = null
+let statusPollInFlight = false
 
 export function registerMonitoringIpc(mainWindow) {
   // Start monitoring when server starts
   serverProcess.on('started', () => {
     const pid = serverProcess.pid
     if (pid) {
-      monitorService.startMonitoring(pid)
-
       monitorService.removeAllListeners('stats')
       monitorService.removeAllListeners('monitor-error')
       monitorService.removeAllListeners('monitor-unavailable')
@@ -32,6 +31,8 @@ export function registerMonitoringIpc(mainWindow) {
           mainWindow.webContents.send('monitoring:error', `Monitoring stopped: ${msg}`)
         }
       })
+
+      monitorService.startMonitoring(pid)
 
       startStatusPolling(mainWindow)
 
@@ -77,7 +78,9 @@ export function registerMonitoringIpc(mainWindow) {
 
 function startStatusPolling(mainWindow) {
   stopStatusPolling()
-  statusInterval = setInterval(async () => {
+  const poll = async () => {
+    if (statusPollInFlight || !serverProcess.isRunning) return
+    statusPollInFlight = true
     try {
       const serverStatus = await monitorService.queryServerStatus()
       let tps = null
@@ -87,8 +90,13 @@ function startStatusPolling(mainWindow) {
       if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send('monitoring:server-status', { ...serverStatus, tps })
       }
-    } catch { /* ignore polling errors */ }
-  }, 5000)
+    } catch { /* ignore polling errors */
+    } finally {
+      statusPollInFlight = false
+    }
+  }
+  poll()
+  statusInterval = setInterval(poll, 10000)
 }
 
 function stopStatusPolling() {
@@ -96,4 +104,5 @@ function stopStatusPolling() {
     clearInterval(statusInterval)
     statusInterval = null
   }
+  statusPollInFlight = false
 }

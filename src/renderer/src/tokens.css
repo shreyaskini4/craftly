@@ -31,8 +31,10 @@
   --text-primary: #f0f6fc;
   --text-secondary: #8b949e;
   --text-tertiary: #6e7681;
-  --font-sans: 'Upheaval', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Cascadia Mono', 'Consolas', monospace;
   --font-pixel: 'Upheaval', monospace;
+  --font-nothing: 'Pixelout', monospace;
 
   /* ── Accents & States ── */
   --color-primary: #9333ea;
@@ -107,5 +109,3 @@
   --border-hover: var(--border-strong);
   --transition: var(--transition-fast);
 }
-
-

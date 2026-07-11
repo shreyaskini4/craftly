@@ -14,8 +14,11 @@ function ConsolePage() {
   const [autoScroll, setAutoScroll] = useState(true)
 
   useEffect(() => {
-    if (autoScroll && consoleEndRef.current) {
-      consoleEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    if (autoScroll && consoleContainerRef.current) {
+      // Smooth scrolling restarts a compositor animation for every server log
+      // line. A direct scroll keeps busy servers responsive.
+      const el = consoleContainerRef.current
+      el.scrollTop = el.scrollHeight
     }
   }, [consoleLines, autoScroll])
 

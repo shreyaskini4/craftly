@@ -1,8 +1,10 @@
 import { create } from 'zustand'
 
-const MAX_CONSOLE_LINES = 5000
+const MAX_CONSOLE_LINES = 1000
 let lineIdCounter = 0
 let listenersInitialized = false
+let pendingLines = []
+let flushTimer = null
 
 const useServerStore = create((set, get) => ({
   status: 'offline',
@@ -28,13 +30,21 @@ const useServerStore = create((set, get) => ({
 
     const line = { id, text, type, timestamp }
 
-    set((state) => {
-      const newLines = [...state.consoleLines, line]
-      if (newLines.length > MAX_CONSOLE_LINES) {
-        return { consoleLines: newLines.slice(newLines.length - MAX_CONSOLE_LINES) }
-      }
-      return { consoleLines: newLines }
-    })
+    pendingLines.push(line)
+    if (flushTimer) return
+
+    flushTimer = setTimeout(() => {
+      const lines = pendingLines
+      pendingLines = []
+      flushTimer = null
+      set((state) => {
+        const newLines = [...state.consoleLines, ...lines]
+        if (newLines.length > MAX_CONSOLE_LINES) {
+          return { consoleLines: newLines.slice(-MAX_CONSOLE_LINES) }
+        }
+        return { consoleLines: newLines }
+      })
+    }, 100)
   },
 
   setStatus: (status) => {
@@ -48,7 +58,12 @@ const useServerStore = create((set, get) => ({
 
   setPid: (pid) => set({ pid }),
 
-  clearConsole: () => set({ consoleLines: [] }),
+  clearConsole: () => {
+    pendingLines = []
+    if (flushTimer) clearTimeout(flushTimer)
+    flushTimer = null
+    set({ consoleLines: [] })
+  },
 
   setStartTime: (startTime) => set({ startTime }),
 

@@ -2,7 +2,6 @@
    Craftly — Premium Dark Design System
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 @import './tokens.css';
 
 @font-face {
@@ -444,6 +443,15 @@ body {
   line-height: 1.2;
 }
 
+.uptime-value {
+  font-family: var(--font-nothing);
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
 .card-subtitle {
   color: var(--text-secondary);
   font-size: 13px;
@@ -777,7 +785,7 @@ body {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-md);
-  font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+  font-family: var(--font-mono);
   font-size: var(--font-sm);
   line-height: 1.6;
 }
@@ -824,7 +832,7 @@ body {
 
 .console-input .prompt {
   color: var(--color-primary);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: var(--font-base);
   font-weight: 600;
   flex-shrink: 0;
@@ -836,7 +844,7 @@ body {
   background: transparent;
   border: none;
   color: var(--text-primary);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: var(--font-sm);
   outline: none;
   caret-color: var(--color-primary);
@@ -1472,7 +1480,7 @@ body {
 }
 
 .font-mono {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
 }
 
 .w-full {
@@ -1919,6 +1927,78 @@ body {
   display: inline-block;
 }
 
+/* Performance baseline: avoid continuous compositing and full-surface blur.
+   The app stays visually layered, but no longer keeps the GPU repainting cards. */
+*, *::before, *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.sidebar,
+.card,
+.glass-card,
+.modal-overlay,
+.modal-content {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.sidebar {
+  background: var(--bg-panel);
+}
+
+.card,
+.glass-card {
+  background: var(--bg-surface) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.card:hover,
+.glass-card:hover,
+.glow-accent,
+.glow-success,
+.glow-warning,
+.glow-danger,
+.glow-online,
+.glow-starting,
+.glow-offline,
+.glow-purple,
+.glow-online:hover,
+.glow-starting:hover,
+.glow-offline:hover,
+.glow-success:hover,
+.glow-purple:hover,
+.btn-quick-action:hover:not(:disabled),
+.btn-quick-action.btn-restart:hover:not(:disabled),
+.btn-quick-action.btn-console:hover:not(:disabled) {
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.recharts-area-curve,
+.recharts-area-area,
+.card.glow-success .recharts-area-curve,
+.card.glow-success .recharts-area-area {
+  filter: none !important;
+}
+
+.sidebar-logo,
+.sidebar-title,
+.badge-dot.pulse,
+.status-dot.transitional,
+.animate-neon-pulse,
+.animate-cyber-flicker {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}
+
 .glow-text-primary {
   text-shadow: 0 0 8px rgba(147, 51, 234, 0.6), 0 0 16px rgba(147, 51, 234, 0.3);
 }
@@ -2065,5 +2145,3 @@ body {
 .recharts-cartesian-grid-vertical line {
   stroke-width: 1px;
 }
-
-
