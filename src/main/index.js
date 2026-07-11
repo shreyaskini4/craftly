@@ -18,6 +18,7 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 700,
     backgroundColor: '#111111',
+    icon: join(__dirname, '../../build/icon.png'),
     titleBarStyle: 'hidden',
     titleBarOverlay: {
       color: '#111111',
