@@ -2,10 +2,22 @@
    Craftly — Premium Dark Design System
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=VT323&display=swap');
-
-/* ── CSS Custom Properties ── */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 @import './tokens.css';
+
+@font-face {
+  font-family: 'Upheaval';
+  src: url('./assets/fonts/upheaval.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Pixelout';
+  src: url('./assets/fonts/pixelout.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 /* ── Global Reset & Base ── */
 *,
@@ -1908,6 +1920,13 @@ body {
   font-family: var(--font-pixel);
   image-rendering: pixelated;
   letter-spacing: 0.5px;
+}
+
+.brand-text {
+  font-family: 'Pixelout', sans-serif !important;
+  image-rendering: pixelated;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
 }
 
 .glow-text-primary {

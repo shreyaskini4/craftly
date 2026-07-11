@@ -31,8 +31,8 @@
   --text-primary: #f0f6fc;
   --text-secondary: #8b949e;
   --text-tertiary: #6e7681;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-pixel: 'VT323', monospace;
+  --font-sans: 'Upheaval', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-pixel: 'Upheaval', monospace;
 
   /* ── Accents & States ── */
   --color-primary: #9333ea;

@@ -271,7 +271,7 @@ function WelcomePage({ onComplete }) {
   return (
     <div className="flex-col h-full items-center justify-center slide-up p-xl">
       <div style={{ textAlign: 'center', marginBottom: 'var(--space-2xl)' }}>
-        <h1 className="text-3xl font-bold mb-sm text-gradient">Welcome to Craftly</h1>
+        <h1 className="text-3xl font-bold mb-sm text-gradient">Welcome to <span className="brand-text">Craftly</span></h1>
         <p className="text-secondary text-lg">Let's get your Minecraft server set up.</p>
       </div>
 

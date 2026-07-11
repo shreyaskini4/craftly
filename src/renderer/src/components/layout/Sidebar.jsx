@@ -23,7 +23,7 @@ function Sidebar({ activePage, onNavigate }) {
         <div className="sidebar-brand">
           <span className="sidebar-logo animate-cyber-flicker">⛏</span>
           <div>
-            <h1 className="sidebar-title text-pixel">Craftly</h1>
+            <h1 className="sidebar-title brand-text">Craftly</h1>
             <span className="sidebar-version text-pixel">v1.0.0</span>
           </div>
         </div>
