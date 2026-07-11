@@ -155,11 +155,13 @@ function DashboardPage({ onNavigate }) {
     tpsValue >= 15 ? 'warning' : 'danger'
 
   const chartTooltipStyle = {
-    backgroundColor: 'var(--bg-elevated)',
-    border: '1px solid var(--border-subtle)',
-    borderRadius: 'var(--radius-md)',
-    fontSize: 'var(--font-xs)',
-    color: 'var(--text-primary)'
+    backgroundColor: '#000000',
+    border: '1px solid rgba(147, 51, 234, 0.4)',
+    borderRadius: '4px',
+    fontFamily: 'var(--font-pixel)',
+    fontSize: '16px',
+    color: 'var(--text-primary)',
+    padding: '8px 12px'
   }
 
   if (loadingSettings) {
@@ -247,13 +249,16 @@ function DashboardPage({ onNavigate }) {
 
       <div className="dashboard-stats-grid">
         {/* Server Status Card */}
-        <div className={`card ${isOnline ? 'glow-pulse-online' : 'glow-pulse-offline'}`}>
+        <div className={`card ${status === 'online' ? 'glow-online' : status === 'offline' ? 'glow-offline' : 'glow-starting'}`}>
           <div className="card-content">
             <div className="card-header">
-              <span className="card-title">Server Status</span>
+              <span className="card-title text-pixel">Server Status</span>
               <StatusBadge status={status} />
             </div>
-            <div className="card-value">{formatUptime(uptime)}</div>
+            <div className={`card-value text-pixel ${
+              status === 'online' ? 'glow-text-success' :
+              status === 'offline' ? 'glow-text-danger' : 'glow-text-warning'
+            }`}>{formatUptime(uptime)}</div>
             <p className="card-subtitle">Uptime</p>
           </div>
           <div className="card-info-bar">
@@ -266,9 +271,9 @@ function DashboardPage({ onNavigate }) {
         <div className={`card ${isOnline && players.online > 0 ? 'glow-success' : ''}`}>
           <div className="card-content">
             <div className="card-header">
-              <span className="card-title"><div className="icon-chip primary"><Users size={16} /></div>Players</span>
+              <span className="card-title text-pixel"><div className="icon-chip primary"><Users size={16} /></div>Players</span>
             </div>
-            <div className="card-value">{players.online}<span style={{ fontSize: 'var(--font-lg)', color: 'var(--text-tertiary)' }}>/{players.max || 20}</span></div>
+            <div className="card-value text-pixel glow-text-success">{players.online}<span style={{ fontSize: 'var(--font-lg)', color: 'var(--text-tertiary)' }}>/{players.max || 20}</span></div>
             {players.list.length > 0 ? (
               <div style={{ marginTop: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
                 {players.list.slice(0, 5).map(p => (
@@ -293,25 +298,26 @@ function DashboardPage({ onNavigate }) {
         </div>
 
         {/* RAM Usage Card */}
-        <div className="card">
+        <div className="card glow-purple">
           <div className="card-content" style={{ paddingBottom: 0 }}>
             <div className="card-header">
-              <span className="card-title"><div className="icon-chip primary"><MemoryStick size={16} /></div>RAM Usage</span>
+              <span className="card-title text-pixel"><div className="icon-chip primary"><MemoryStick size={16} /></div>RAM Usage</span>
             </div>
-            <div className="card-value">{currentRam.used}</div>
+            <div className="card-value text-pixel glow-text-primary">{currentRam.used}</div>
             <div className="chart-container" style={{ marginTop: 'auto', paddingTop: 'var(--space-md)', flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: '80px' }}>
               <ResponsiveContainer width="100%" height="100%" style={{ flexGrow: 1 }}>
-                <AreaChart data={ramHistory.map(d => ({ ...d, numericValue: parseFloat(d.value) || 0 }))} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <AreaChart data={ramHistory.map(d => ({ ...d, numericValue: parseFloat(d.value) || 0 }))} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <defs>
                     <linearGradient id="ramGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.35} />
+                      <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.6} />
                       <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
+                  <CartesianGrid stroke="rgba(147, 51, 234, 0.08)" strokeDasharray="3 3" />
                   <XAxis dataKey="time" hide />
                   <YAxis hide />
                   <Tooltip contentStyle={chartTooltipStyle} className="custom-chart-tooltip" formatter={(v) => [`${v} GB`, 'RAM']} />
-                  <Area type="monotone" dataKey="numericValue" stroke="var(--color-primary)" fill="url(#ramGradient)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="numericValue" stroke="var(--color-primary)" fill="url(#ramGradient)" strokeWidth={2.5} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -322,25 +328,26 @@ function DashboardPage({ onNavigate }) {
         </div>
 
         {/* CPU Usage Card */}
-        <div className="card">
+        <div className="card glow-success">
           <div className="card-content" style={{ paddingBottom: 0 }}>
             <div className="card-header">
-              <span className="card-title"><div className="icon-chip success"><Cpu size={16} /></div>CPU Usage</span>
+              <span className="card-title text-pixel"><div className="icon-chip success"><Cpu size={16} /></div>CPU Usage</span>
             </div>
-            <div className="card-value">{currentCpu}<span style={{ fontSize: 'var(--font-base)', color: 'var(--text-tertiary)' }}>%</span></div>
+            <div className="card-value text-pixel glow-text-success">{currentCpu}<span style={{ fontSize: 'var(--font-base)', color: 'var(--text-tertiary)' }}>%</span></div>
             <div className="chart-container" style={{ marginTop: 'auto', paddingTop: 'var(--space-md)', flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: '80px' }}>
               <ResponsiveContainer width="100%" height="100%" style={{ flexGrow: 1 }}>
-                <AreaChart data={cpuHistory} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <AreaChart data={cpuHistory} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <defs>
                     <linearGradient id="cpuGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-success)" stopOpacity={0.35} />
+                      <stop offset="5%" stopColor="var(--color-success)" stopOpacity={0.6} />
                       <stop offset="95%" stopColor="var(--color-success)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
+                  <CartesianGrid stroke="rgba(16, 185, 129, 0.08)" strokeDasharray="3 3" />
                   <XAxis dataKey="time" hide />
                   <YAxis hide domain={[0, 100]} />
                   <Tooltip contentStyle={chartTooltipStyle} className="custom-chart-tooltip" formatter={(v) => [`${v}%`, 'CPU']} />
-                  <Area type="monotone" dataKey="value" stroke="var(--color-success)" fill="url(#cpuGradient)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="value" stroke="var(--color-success)" fill="url(#cpuGradient)" strokeWidth={2.5} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -356,7 +363,7 @@ function DashboardPage({ onNavigate }) {
         <div className={`card ${!tpsError && isOnline && tpsValue >= 18 ? 'glow-success' : !tpsError && isOnline && tpsValue >= 15 ? 'glow-warning' : !tpsError && isOnline && tpsValue !== null ? 'glow-danger' : ''}`}>
           <div className="card-content">
             <div className="card-header">
-              <span className="card-title"><div className={`icon-chip ${tpsIconClass}`.trim()}><Activity size={16} /></div>TPS</span>
+              <span className="card-title text-pixel"><div className={`icon-chip ${tpsIconClass}`.trim()}><Activity size={16} /></div>TPS</span>
             </div>
             {tpsError ? (
               <div style={{ fontSize: 'var(--font-sm)', color: 'var(--text-tertiary)', marginTop: 'var(--space-sm)' }}>
@@ -364,7 +371,7 @@ function DashboardPage({ onNavigate }) {
               </div>
             ) : (
               <>
-                <div className="card-value" style={{ color: tpsColor }}>
+                <div className="card-value text-pixel" style={{ color: tpsColor, textShadow: tpsValue !== null ? (tpsValue >= 18 ? '0 0 6px rgba(16, 185, 129, 0.8), 0 0 15px rgba(16, 185, 129, 0.4)' : tpsValue >= 15 ? '0 0 6px rgba(245, 158, 11, 0.8), 0 0 15px rgba(245, 158, 11, 0.4)' : '0 0 6px rgba(244, 63, 94, 0.8), 0 0 15px rgba(244, 63, 94, 0.4)') : 'none' }}>
                   {tpsValue !== null ? tpsValue.toFixed(1) : 'N/A'}
                 </div>
                 <p className="card-subtitle">
@@ -378,19 +385,19 @@ function DashboardPage({ onNavigate }) {
           </div>
         </div>
 
-        <div className="card">
+        <div className="card glow-purple">
           <div className="card-content">
             <div className="card-header">
-              <span className="card-title">Quick Actions</span>
+              <span className="card-title text-pixel">Quick Actions</span>
             </div>
             <div className="flex gap-sm" style={{ flexWrap: 'wrap', marginTop: 'var(--space-sm)' }}>
-              <button className="btn btn-outline btn-premium" onClick={handleRestart} disabled={!isOnline}>
+              <button className="btn btn-outline text-pixel btn-quick-action btn-restart" onClick={handleRestart} disabled={!isOnline}>
                 <RotateCcw size={16} /> Restart Server
               </button>
-              <button className="btn btn-outline btn-premium" onClick={handleBackup}>
+              <button className="btn btn-outline text-pixel btn-quick-action" onClick={handleBackup}>
                 <Archive size={16} /> Backup World
               </button>
-              <button className="btn btn-outline btn-premium text-accent" onClick={() => onNavigate('console')}>
+              <button className="btn btn-outline text-pixel btn-quick-action btn-console" onClick={() => onNavigate('console')}>
                 <ArrowRight size={16} /> Open Console
               </button>
             </div>

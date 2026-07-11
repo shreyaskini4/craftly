@@ -1,22 +1,22 @@
 /* ============================================
-   Craftly — Premium Design Tokens
+   Craftly — Premium Design Tokens (Cyber-Pixel Minecraft Fusion)
    ============================================ */
 
 :root {
   /* ── Surface Colors ── */
-  --bg-app: #161618;
-  --bg-panel: #1c1c1f;
-  --bg-surface: #222225;
-  --bg-elevated: #2c2c30;
+  --bg-app: #08080a;
+  --bg-panel: #0c0c10;
+  --bg-surface: #121217;
+  --bg-elevated: #181822;
   
   --bg-primary: var(--bg-app);
   --bg-secondary: var(--bg-panel);
   --bg-tertiary: var(--bg-surface);
   
   /* ── Glass Colors (Strict Scale) ── */
-  --glass-bg-heavy: rgba(13, 17, 23, 0.7);
-  --glass-bg-medium: rgba(22, 27, 34, 0.45);
-  --glass-bg-light: rgba(28, 33, 40, 0.35);
+  --glass-bg-heavy: rgba(12, 12, 16, 0.85);
+  --glass-bg-medium: rgba(16, 16, 22, 0.55);
+  --glass-bg-light: rgba(22, 22, 30, 0.35);
 
   /* ── Borders ── */
   --border-subtle: rgba(255, 255, 255, 0.06);
@@ -24,13 +24,15 @@
   --border-accent: rgba(147, 51, 234, 0.25);
   
   /* Flat Borders */
-  --border-flat: #2c2c30;
-  --border-flat-hover: #3a3a40;
+  --border-flat: #121217;
+  --border-flat-hover: #181822;
 
   /* ── Typography ── */
   --text-primary: #f0f6fc;
   --text-secondary: #8b949e;
   --text-tertiary: #6e7681;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-pixel: 'VT323', monospace;
 
   /* ── Accents & States ── */
   --color-primary: #9333ea;
@@ -43,20 +45,20 @@
   --color-secondary-glow: rgba(147, 51, 234, 0.25);
   --color-secondary-subtle: rgba(147, 51, 234, 0.15);
   
-  --color-success: #2ea043;
-  --color-success-hover: #3fb950;
-  --color-success-glow: rgba(46, 160, 67, 0.25);
-  --color-success-subtle: rgba(46, 160, 67, 0.15);
+  --color-success: #10b981;
+  --color-success-hover: #34d399;
+  --color-success-glow: rgba(16, 185, 129, 0.25);
+  --color-success-subtle: rgba(16, 185, 129, 0.15);
   
-  --color-danger: #da3633;
-  --color-danger-hover: #f85149;
-  --color-danger-glow: rgba(218, 54, 51, 0.25);
-  --color-danger-subtle: rgba(218, 54, 51, 0.15);
+  --color-danger: #f43f5e;
+  --color-danger-hover: #fb7185;
+  --color-danger-glow: rgba(244, 63, 94, 0.25);
+  --color-danger-subtle: rgba(244, 63, 94, 0.15);
 
-  --color-warning: #d29922;
-  --color-warning-hover: #e3b341;
-  --color-warning-glow: rgba(210, 153, 34, 0.25);
-  --color-warning-subtle: rgba(210, 153, 34, 0.15);
+  --color-warning: #f59e0b;
+  --color-warning-hover: #fbbf24;
+  --color-warning-glow: rgba(245, 158, 11, 0.25);
+  --color-warning-subtle: rgba(245, 158, 11, 0.15);
 
   /* ── Spacing Scale (8pt System) ── */
   --space-xs: 4px;
@@ -94,7 +96,7 @@
   /* ── Transitions ── */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bounce: 300ms cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-bounce: 400ms cubic-bezier(0.16, 1, 0.3, 1);
 
   /* ── Legacy Aliases & Global Tokens ── */
   --accent: var(--color-primary);

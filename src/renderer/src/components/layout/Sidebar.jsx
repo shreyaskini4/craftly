@@ -21,10 +21,10 @@ function Sidebar({ activePage, onNavigate }) {
       <div className="sidebar-header">
         <div className="titlebar-drag" />
         <div className="sidebar-brand">
-          <span className="sidebar-logo">⛏</span>
+          <span className="sidebar-logo animate-cyber-flicker">⛏</span>
           <div>
-            <h1 className="sidebar-title">Craftly</h1>
-            <span className="sidebar-version">v1.0.0</span>
+            <h1 className="sidebar-title text-pixel">Craftly</h1>
+            <span className="sidebar-version text-pixel">v1.0.0</span>
           </div>
         </div>
       </div>
@@ -39,21 +39,21 @@ function Sidebar({ activePage, onNavigate }) {
               onClick={() => onNavigate(item.id)}
             >
               <Icon size={20} className="icon" />
-              <span className="label">{item.label}</span>
+              <span className="label text-pixel">{item.label}</span>
             </button>
           )
         })}
         <div style={{ flex: 1 }} />
       </nav>
 
-      <div className="sidebar-status">
+      <div className={`sidebar-status ${status === 'starting' || status === 'stopping' ? 'transitional' : status}`}>
         <div className={`status-dot ${isOnline ? 'online' : ''} ${isTransitional ? 'transitional' : ''}`} />
         <div className="status-text">
-          <span className="status-label">Server Status</span>
-          <span className={`status-value ${status}`}>
+          <span className="status-label text-pixel">Server Status</span>
+          <span className={`status-value text-pixel ${status === 'starting' || status === 'stopping' ? 'transitional' : status}`}>
             {status === 'online' ? 'Online' :
-             status === 'starting' ? 'Starting...' :
-             status === 'stopping' ? 'Stopping...' : 'Offline'}
+             status === 'starting' ? 'Starting' :
+             status === 'stopping' ? 'Stopping' : 'Offline'}
           </span>
         </div>
       </div>
