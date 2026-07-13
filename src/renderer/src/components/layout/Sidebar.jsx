@@ -1,4 +1,4 @@
-import { LayoutDashboard, Terminal, Package, Archive, Settings, Sliders } from 'lucide-react'
+import { LayoutDashboard, Terminal, Package, Archive, Settings, Sliders, HelpCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import useServerStore from '../../stores/serverStore'
 
@@ -8,7 +8,8 @@ const navItems = [
   { id: 'mods', label: 'Mods', icon: Package },
   { id: 'backups', label: 'Backups', icon: Archive },
   { id: 'properties', label: 'Server Properties', icon: Sliders },
-  { id: 'settings', label: 'Settings', icon: Settings }
+  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'faq', label: 'Help / FAQ', icon: HelpCircle }
 ]
 
 function Sidebar({ activePage, onNavigate }) {

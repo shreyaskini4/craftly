@@ -8,6 +8,7 @@ import BackupsPage from './pages/BackupsPage'
 import SettingsPage from './pages/SettingsPage'
 import ServerPropertiesPage from './pages/ServerPropertiesPage'
 import WelcomePage from './pages/WelcomePage'
+import FaqPage from './pages/FaqPage'
 import useServerStore from './stores/serverStore'
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
       case 'backups': return <BackupsPage />
       case 'settings': return <SettingsPage />
       case 'properties': return <ServerPropertiesPage />
+      case 'faq': return <FaqPage />
       default: return <DashboardPage onNavigate={setActivePage} />
     }
   }
