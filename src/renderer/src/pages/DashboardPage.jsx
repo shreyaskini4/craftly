@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 // import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { Play, Square, RotateCcw, Users, /* Cpu, MemoryStick, */ Activity, /* ArrowRight, */ Archive } from 'lucide-react'
+import { Play, Square, RotateCcw, Users, /* Cpu, MemoryStick, */ Activity, ArrowRight, Archive } from 'lucide-react'
 import { toast } from 'sonner'
 import useServerStore from '../stores/serverStore'
 import useMonitorStore from '../stores/monitorStore'
@@ -228,10 +228,10 @@ function DashboardPage({ onNavigate }) {
         </div>
         <div className="flex gap-md items-center">
           {settings && (
-            <div className="flex gap-sm items-center" style={{ background: 'var(--bg-elevated)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+            <div className="flex gap-sm items-center no-drag" style={{ background: 'var(--bg-elevated)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
               <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-xs)', fontWeight: 600 }}>Version</div>
               <select
-                className="select"
+                className="select no-drag"
                 value={settings.serverVersion || ''}
                 onChange={e => updateSetting('serverVersion', e.target.value)}
                 style={{ width: 140, background: 'transparent', border: 'none', padding: 0, fontWeight: 500, fontSize: 'var(--font-sm)', paddingRight: '20px', boxShadow: 'none' }}
@@ -244,11 +244,11 @@ function DashboardPage({ onNavigate }) {
           )}
 
           {isOffline ? (
-            <button className="btn btn-success" onClick={handleStart} style={{ padding: '8px 20px', fontWeight: 600 }}>
+            <button className="btn btn-success no-drag" onClick={handleStart} style={{ padding: '8px 20px', fontWeight: 600 }}>
               <Play size={18} /> Start
             </button>
           ) : (
-            <button className="btn btn-danger" onClick={handleStop} style={{ padding: '8px 20px', fontWeight: 600 }}>
+            <button className="btn btn-danger no-drag" onClick={handleStop} style={{ padding: '8px 20px', fontWeight: 600 }}>
               <Square size={18} /> Stop
             </button>
           )}
@@ -401,9 +401,9 @@ function DashboardPage({ onNavigate }) {
               <button className="btn btn-outline text-pixel btn-quick-action" onClick={handleBackup}>
                 <Archive size={16} /> Backup World
               </button>
-              {/* <button className="btn btn-outline text-pixel btn-quick-action btn-console" onClick={() => onNavigate('console')}>
+              <button className="btn btn-outline text-pixel btn-quick-action btn-console" onClick={() => onNavigate('console')}>
                 <ArrowRight size={16} /> Open Console
-              </button> */}
+              </button>
             </div>
           </div>
         </div>

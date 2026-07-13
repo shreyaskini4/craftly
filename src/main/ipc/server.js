@@ -17,8 +17,11 @@ export function registerServerIpc(mainWindow) {
       throw new Error(`Server jar (${jarName}) not found. Please download a server version first in Settings or import a valid server directory.`)
     }
 
+    const serverJavaPaths = settingsStore.get('serverJavaPaths') || {}
+    const javaPath = serverJavaPaths[serverDir] || settings.javaPath || 'java'
+
     const config = {
-      javaPath: settings.javaPath || 'java',
+      javaPath,
       jarPath,
       xmx: settings.xmx || '4G',
       xms: settings.xms || '2G',

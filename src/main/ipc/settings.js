@@ -4,6 +4,7 @@ import path from 'path'
 import settingsStore from '../services/settingsStore.js'
 import { detectJava, validateJavaPath } from '../utils/javaDetector.js'
 import { readProperties, writeProperties } from '../utils/serverProperties.js'
+import { getRequiredJavaVersion, provisionJava, listProvisionedJava, deleteProvisionedJava } from '../services/javaProvisioner.js'
 
 export function registerSettingsIpc(mainWindow) {
   ipcMain.handle('settings:get', async () => {
@@ -28,12 +29,47 @@ export function registerSettingsIpc(mainWindow) {
       const isValid = await validateJavaPath(javaPath)
       if (isValid) {
         settingsStore.set('javaPath', javaPath)
+        const serverDir = settingsStore.get('serverDir')
+        if (serverDir) {
+          const serverJavaPaths = settingsStore.get('serverJavaPaths') || {}
+          serverJavaPaths[serverDir] = javaPath
+          settingsStore.set('serverJavaPaths', serverJavaPaths)
+        }
         return javaPath
       } else {
         throw new Error('The selected file is not a valid Java executable')
       }
     }
     return null
+  })
+
+  ipcMain.handle('settings:provision-java', async (event, version) => {
+    const requiredMajor = getRequiredJavaVersion(version)
+    const onProgress = (progress) => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('download:progress', {
+          ...progress,
+          version,
+          majorVersion: requiredMajor
+        })
+      }
+    }
+    const javaPath = await provisionJava(requiredMajor, onProgress)
+    const serverDir = settingsStore.get('serverDir')
+    if (serverDir) {
+      const serverJavaPaths = settingsStore.get('serverJavaPaths') || {}
+      serverJavaPaths[serverDir] = javaPath
+      settingsStore.set('serverJavaPaths', serverJavaPaths)
+    }
+    return javaPath
+  })
+
+  ipcMain.handle('settings:list-provisioned-java', async () => {
+    return await listProvisionedJava()
+  })
+
+  ipcMain.handle('settings:delete-provisioned-java', async (_event, majorVersion) => {
+    return await deleteProvisionedJava(majorVersion)
   })
 
   ipcMain.handle('settings:browse-dir', async () => {

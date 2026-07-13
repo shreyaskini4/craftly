@@ -50,7 +50,10 @@ contextBridge.exposeInMainWorld('api', {
     scanDir: () => ipcRenderer.invoke('settings:browse-dir'),
     importServer: (data) => ipcRenderer.invoke('settings:import-server', data),
     detectJava: () => ipcRenderer.invoke('settings:detect-java'),
-    checkDirEmpty: (dirPath) => ipcRenderer.invoke('settings:check-dir-empty', dirPath)
+    checkDirEmpty: (dirPath) => ipcRenderer.invoke('settings:check-dir-empty', dirPath),
+    provisionJava: (version) => ipcRenderer.invoke('settings:provision-java', version),
+    listProvisionedJava: () => ipcRenderer.invoke('settings:list-provisioned-java'),
+    deleteProvisionedJava: (version) => ipcRenderer.invoke('settings:delete-provisioned-java', version)
   },
 
   // ─── Properties ───────────────────────────────────────────────────

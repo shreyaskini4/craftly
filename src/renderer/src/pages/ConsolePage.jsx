@@ -37,6 +37,7 @@ function ConsolePage() {
       setCommandHistory(prev => [cmd, ...prev.slice(0, 99)])
       setCommand('')
       setHistoryIndex(-1)
+      setAutoScroll(true)
     } catch (err) {
       toast.error(err.message || 'Failed to send command')
     }
@@ -88,13 +89,27 @@ function ConsolePage() {
 
   const clearConsole = useServerStore(state => state.clearConsole)
 
-  const getLineClass = (text) => {
-    if (!text) return ''
+  const getLineClass = (line) => {
+    if (!line) return ''
+    const text = line.text || ''
     const upper = text.toUpperCase()
-    if (upper.includes('ERROR') || upper.includes('SEVERE') || upper.includes('FATAL')) return 'error'
-    if (upper.includes('WARN')) return 'warn'
-    if (upper.includes('INFO')) return 'info'
-    return ''
+    const classes = []
+
+    if (line.type === 'stderr') {
+      classes.push('type-stderr')
+    } else if (line.type === 'stdout') {
+      classes.push('type-stdout')
+    }
+
+    if (upper.includes('ERROR') || upper.includes('SEVERE') || upper.includes('FATAL') || line.type === 'stderr') {
+      classes.push('error')
+    } else if (upper.includes('WARN')) {
+      classes.push('warn')
+    } else if (upper.includes('INFO')) {
+      classes.push('info')
+    }
+
+    return classes.join(' ')
   }
 
   const formatTime = (ts) => {
@@ -115,20 +130,20 @@ function ConsolePage() {
         </div>
         <div className="flex gap-sm">
           {isOffline ? (
-            <button className="btn btn-success btn-sm btn-premium glow-success" onClick={handleStart}>
+            <button className="btn btn-success btn-sm btn-premium glow-success no-drag" onClick={handleStart}>
               <Play size={14} /> Start
             </button>
           ) : (
             <>
-              <button className="btn btn-danger btn-sm btn-premium glow-danger" onClick={handleStop} disabled={!isOnline}>
+              <button className="btn btn-danger btn-sm btn-premium glow-danger no-drag" onClick={handleStop} disabled={!isOnline}>
                 <Square size={14} /> Stop
               </button>
-              <button className="btn btn-outline btn-sm btn-premium" onClick={handleRestart} disabled={!isOnline}>
+              <button className="btn btn-outline btn-sm btn-premium no-drag" onClick={handleRestart} disabled={!isOnline}>
                 <RotateCcw size={14} /> Restart
               </button>
             </>
           )}
-          <button className="btn btn-ghost btn-sm btn-premium" onClick={clearConsole}>
+          <button className="btn btn-ghost btn-sm btn-premium no-drag" onClick={clearConsole}>
             <Trash2 size={14} /> Clear
           </button>
         </div>
@@ -142,7 +157,7 @@ function ConsolePage() {
             </div>
           ) : (
             consoleLines.map(line => (
-              <div key={line.id} className={`console-line ${getLineClass(line.text)}`}>
+              <div key={line.id} className={`console-line ${getLineClass(line)}`}>
                 <span className="timestamp">[{formatTime(line.timestamp)}]</span>
                 <span className="text">{line.text}</span>
               </div>

@@ -8,8 +8,6 @@ function WelcomePage({ onComplete }) {
   const [mode, setMode] = useState(null)
   const [step, setStep] = useState(1)
   const [dirPath, setDirPath] = useState('')
-  const [javaPath, setJavaPath] = useState('')
-  const [javaInstalls, setJavaInstalls] = useState([])
   const [versions, setVersions] = useState([])
   const [serverType, setServerType] = useState('vanilla')
   const [serverVersion, setServerVersion] = useState('')
@@ -52,42 +50,6 @@ function WelcomePage({ onComplete }) {
     }
   }
 
-  const handleDetectJava = async () => {
-    try {
-      const installs = await window.api.settings.detectJava()
-      setJavaInstalls(installs)
-      if (installs.length > 0) {
-        setJavaPath(installs[0].path)
-        toast.success(`Found ${installs.length} Java installation(s)`)
-      } else {
-        toast.error('No Java installations found')
-      }
-    } catch (err) {
-      toast.error(err.message)
-    }
-  }
-
-  const handleBrowseJava = async () => {
-    try {
-      const path = await window.api.settings.browseJava()
-      if (path) {
-        setJavaPath(path)
-        toast.success('Java path selected')
-      }
-    } catch (err) {
-      toast.error(err.message)
-    }
-  }
-
-  const confirmJava = async () => {
-    if (!javaPath) {
-      toast.error('Please select or detect a Java executable first.')
-      return
-    }
-    await window.api.settings.set('javaPath', javaPath)
-    setStep(3)
-  }
-
   const fetchVersions = async (type) => {
     setServerType(type)
     setVersions([])
@@ -110,7 +72,7 @@ function WelcomePage({ onComplete }) {
   }
 
   useEffect(() => {
-    if (step === 3 && versions.length === 0) {
+    if (step === 2 && versions.length === 0) {
       fetchVersions('vanilla')
     }
   }, [step])
@@ -126,6 +88,61 @@ function WelcomePage({ onComplete }) {
       await window.api.settings.set('serverType', serverType)
       await window.api.settings.set('serverVersion', serverVersion)
       
+      // Auto-detect if a compatible Java version is installed locally.
+      const parts = serverVersion.split('.').map(Number)
+      const minor = parts[1] || 0
+      const patch = parts[2] || 0
+
+      let reqJava = 8
+      if (minor >= 21 || (minor === 20 && patch >= 5)) {
+        reqJava = 21
+      } else if (minor >= 17) {
+        reqJava = 17
+      }
+
+      const installs = await window.api.settings.detectJava()
+      const hasCompatible = installs.some(inst => {
+        const versionStr = inst.version
+        let currentMajor = 0
+        if (versionStr.startsWith('1.')) {
+          currentMajor = parseInt(versionStr.split('.')[1]) || 0
+        } else {
+          currentMajor = parseInt(versionStr.split('.')[0]) || 0
+        }
+        if (reqJava === 8) {
+          return currentMajor === 8 || currentMajor === 11
+        }
+        return currentMajor === reqJava
+      })
+
+      if (!hasCompatible) {
+        toast.info(`No compatible Java ${reqJava} version found. Auto-provisioning JRE ${reqJava}...`)
+        setDownloadProgress(0)
+        await window.api.settings.provisionJava(serverVersion)
+        toast.success(`JRE ${reqJava} provisioned successfully!`)
+      } else {
+        // Use the first compatible local Java path
+        const compatibleInstall = installs.find(inst => {
+          const versionStr = inst.version
+          let currentMajor = 0
+          if (versionStr.startsWith('1.')) {
+            currentMajor = parseInt(versionStr.split('.')[1]) || 0
+          } else {
+            currentMajor = parseInt(versionStr.split('.')[0]) || 0
+          }
+          if (reqJava === 8) {
+            return currentMajor === 8 || currentMajor === 11
+          }
+          return currentMajor === reqJava
+        })
+        if (compatibleInstall) {
+          await window.api.settings.set('javaPath', compatibleInstall.path)
+        }
+      }
+
+      // Reset download progress before server JAR download
+      setDownloadProgress(0)
+
       // We'll just fetch latest build internally or omit build for Paper/Fabric to get latest
       await window.api.versions.download(serverType, serverVersion, undefined)
       
@@ -183,48 +200,7 @@ function WelcomePage({ onComplete }) {
 
         {step === 2 && (
           <div className="settings-section flex-col gap-md">
-            <h3 className="settings-title">Step 2: Setup Java</h3>
-            <p className="settings-description">Minecraft requires Java to run. Let's find your installation.</p>
-            
-            <div className="flex gap-sm mb-md">
-              <button className="btn btn-outline" onClick={handleDetectJava}>
-                <Search size={16} className="mr-sm" /> Auto-Detect Java
-              </button>
-              <button className="btn btn-outline" onClick={handleBrowseJava}>
-                <FolderOpen size={16} className="mr-sm" /> Browse for Java
-              </button>
-            </div>
-
-            {javaInstalls.length > 0 && (
-              <div style={{ background: 'var(--bg-tertiary)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)' }}>
-                <p className="settings-description mb-sm">Detected Installations:</p>
-                {javaInstalls.map((j, i) => (
-                  <div key={i} className="flex justify-between items-center py-xs border-b border-subtle last:border-0">
-                    <span className="text-sm truncate mr-sm" title={j.path}>{j.version}</span>
-                    <button 
-                      className={`btn btn-sm ${javaPath === j.path ? 'btn-primary' : 'btn-outline'}`}
-                      onClick={() => setJavaPath(j.path)}
-                    >
-                      {javaPath === j.path ? 'Selected' : 'Select'}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {javaPath && (
-              <div className="flex justify-end mt-md">
-                <button className="btn btn-primary glow-accent" onClick={confirmJava}>
-                  Continue <ChevronRight size={16} className="ml-xs" />
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="settings-section flex-col gap-md">
-            <h3 className="settings-title">Step 3: Download Server Software</h3>
+            <h3 className="settings-title">Step 2: Choose Server Software</h3>
             <p className="settings-description">Choose your preferred server type and version.</p>
 
             <div className="settings-row">

@@ -12,6 +12,7 @@ const Store = ElectronStore.default || ElectronStore
 
 const defaults = {
   javaPath: 'java',
+  serverJavaPaths: {},
   xmx: '4G',
   xms: '2G',
   serverDir: join(app.getPath('userData'), 'server'),

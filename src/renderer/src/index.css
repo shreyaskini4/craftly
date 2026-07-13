@@ -109,10 +109,14 @@ body {
   -webkit-app-region: no-drag;
 }
 
+.no-drag {
+  -webkit-app-region: no-drag !important;
+}
+
 /* ── Main Content ── */
 .main-content {
   overflow-y: auto;
-  padding: var(--space-lg);
+  padding: 44px var(--space-lg) var(--space-lg);
   background: transparent;
   position: relative;
 }
@@ -759,12 +763,10 @@ body {
 
 /* ── Console ── */
 .console-container {
-  background: var(--glass-bg-medium);
-  backdrop-filter: var(--blur-md);
-  -webkit-backdrop-filter: var(--blur-md);
-  border: 1px solid var(--border-subtle);
+  background: rgba(10, 10, 14, 0.96); /* Obsidian dark panel */
+  border: 1px solid rgba(147, 51, 234, 0.25); /* Neon purple accent border */
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), 0 0 15px rgba(147, 51, 234, 0.15); /* Neon purple glow */
   display: flex;
   flex-direction: column;
   height: calc(100vh - 140px);
@@ -776,8 +778,8 @@ body {
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--border-subtle);
-  background: var(--glass-bg-light);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(16, 16, 22, 0.4);
   flex-wrap: wrap;
 }
 
@@ -786,14 +788,15 @@ body {
   overflow-y: auto;
   padding: var(--space-md);
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: 13px; /* Monospace clean font sizing */
   line-height: 1.6;
 }
 
 .console-line {
   display: flex;
   gap: 12px;
-  padding: 2px 0;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02); /* subtle separator */
 }
 
 .console-line .timestamp {
@@ -802,32 +805,44 @@ body {
   white-space: nowrap;
   flex-shrink: 0;
   user-select: none;
+  font-family: var(--font-mono);
 }
 
 .console-line .text {
   white-space: pre-wrap;
   word-break: break-all;
+  font-family: var(--font-mono);
+}
+
+.console-line.type-stderr .text {
+  color: var(--color-danger);
+}
+
+.console-line.type-stdout .text {
+  color: var(--text-primary);
 }
 
 .console-line.error .text {
   color: var(--color-danger);
+  text-shadow: 0 0 8px rgba(244, 63, 94, 0.2);
 }
 
 .console-line.warn .text {
   color: var(--color-warning);
+  text-shadow: 0 0 8px rgba(245, 158, 11, 0.15);
 }
 
 .console-line.info .text {
-  color: var(--color-primary);
+  color: var(--color-primary-hover);
 }
 
 .console-input {
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid rgba(147, 51, 234, 0.25);
   padding: 12px 16px;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--glass-bg-heavy);
+  background: rgba(16, 16, 22, 0.98);
 }
 
 .console-input .prompt {
@@ -845,7 +860,7 @@ body {
   border: none;
   color: var(--text-primary);
   font-family: var(--font-mono);
-  font-size: var(--font-sm);
+  font-size: 13px;
   outline: none;
   caret-color: var(--color-primary);
 }

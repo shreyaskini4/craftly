@@ -17,10 +17,32 @@ function SettingsPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [javaInstalls, setJavaInstalls] = useState([])
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
+  const [provisionedJavas, setProvisionedJavas] = useState([])
+
+  const loadProvisionedJava = async () => {
+    try {
+      const list = await window.api.settings.listProvisionedJava()
+      setProvisionedJavas(list || [])
+    } catch (err) {
+      console.error('Failed to list provisioned Java versions:', err)
+    }
+  }
+
+  const handleDeleteProvisionedJava = async (major) => {
+    try {
+      await window.api.settings.deleteProvisionedJava(major)
+      toast.success(`Deleted JRE ${major}`)
+      await loadProvisionedJava()
+      await loadSettings()
+    } catch (err) {
+      toast.error(`Failed to delete JRE: ${err.message}`)
+    }
+  }
 
   // Load settings on mount
   useEffect(() => {
     loadSettings()
+    loadProvisionedJava()
     
     window.api.settings.detectJava()
       .then(setJavaInstalls)
@@ -136,6 +158,8 @@ function SettingsPage() {
       return
     }
 
+    setDownloading(true)
+    setDownloadProgress(0)
     try {
       if (settings.serverVersion) {
         const parts = settings.serverVersion.split('.').map(Number)
@@ -150,38 +174,68 @@ function SettingsPage() {
         }
 
         const installs = await window.api.settings.detectJava()
-        const selectedJava = installs.find(j => j.path === settings.javaPath)
-        
-        if (selectedJava) {
+        const hasCompatible = installs.some(inst => {
+          const versionStr = inst.version
           let currentMajor = 0
-          if (selectedJava.version.startsWith('1.')) {
-            currentMajor = parseInt(selectedJava.version.split('.')[1])
+          if (versionStr.startsWith('1.')) {
+            currentMajor = parseInt(versionStr.split('.')[1]) || 0
           } else {
-            currentMajor = parseInt(selectedJava.version.split('.')[0])
+            currentMajor = parseInt(versionStr.split('.')[0]) || 0
           }
-
-          let mismatch = false
           if (reqJava === 8) {
-            mismatch = (currentMajor !== 8 && currentMajor !== 11)
-          } else {
-            mismatch = (currentMajor !== reqJava)
+            return currentMajor === 8 || currentMajor === 11
           }
+          return currentMajor === reqJava
+        })
 
-          if (mismatch) {
-            const proceed = window.confirm(`Warning: Minecraft ${settings.serverVersion} requires Java ${reqJava}. You have Java ${currentMajor}. The server may crash. Download anyway?`)
-            if (!proceed) {
-              return
+        if (!hasCompatible) {
+          toast.info(`No compatible Java ${reqJava} version found. Auto-provisioning JRE ${reqJava}...`)
+          setDownloadProgress(0)
+          await window.api.settings.provisionJava(settings.serverVersion)
+          toast.success(`JRE ${reqJava} provisioned successfully!`)
+          await loadProvisionedJava()
+          await loadSettings()
+        } else {
+          // If the currently configured Java path is mismatched, let's switch to the compatible one
+          const activeJava = installs.find(j => j.path === settings.javaPath)
+          let activeMismatched = !activeJava
+          if (activeJava) {
+            let activeMajor = 0
+            if (activeJava.version.startsWith('1.')) {
+              activeMajor = parseInt(activeJava.version.split('.')[1]) || 0
+            } else {
+              activeMajor = parseInt(activeJava.version.split('.')[0]) || 0
+            }
+            if (reqJava === 8) {
+              activeMismatched = (activeMajor !== 8 && activeMajor !== 11)
+            } else {
+              activeMismatched = (activeMajor !== reqJava)
+            }
+          }
+          if (activeMismatched) {
+            const compatibleInstall = installs.find(inst => {
+              const versionStr = inst.version
+              let currentMajor = 0
+              if (versionStr.startsWith('1.')) {
+                currentMajor = parseInt(versionStr.split('.')[1]) || 0
+              } else {
+                currentMajor = parseInt(versionStr.split('.')[0]) || 0
+              }
+              if (reqJava === 8) {
+                return currentMajor === 8 || currentMajor === 11
+              }
+              return currentMajor === reqJava
+            })
+            if (compatibleInstall) {
+              await window.api.settings.set('javaPath', compatibleInstall.path)
+              setSettings(prev => ({ ...prev, javaPath: compatibleInstall.path }))
             }
           }
         }
       }
-    } catch (err) {
-      console.error('Java check failed:', err)
-    }
 
-    setDownloading(true)
-    setDownloadProgress(0)
-    try {
+      setDownloadProgress(0)
+
       if (settings.serverJar) {
         toast.info('Creating backup before upgrade...')
         await window.api.backups.create()
@@ -365,15 +419,23 @@ function SettingsPage() {
           <div className="settings-row">
             <div>
               <label className="settings-label">Java Path</label>
-              <p className="settings-description" style={{ maxWidth: 350, wordBreak: 'break-all' }}>{settings.javaPath || 'No Java path set'}</p>
+              <p className="settings-description" style={{ maxWidth: 350, wordBreak: 'break-all' }}>
+                {settings.serverJavaPaths?.[settings.serverDir] || settings.javaPath || 'java'}
+              </p>
+              <p className="settings-description-sub" style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                Active Java executable path for this server directory.
+              </p>
             </div>
-            <div className="flex gap-sm">
-              <button className="btn btn-outline btn-sm btn-premium" onClick={handleBrowseJava}>
-                <FolderOpen size={14} /> Browse
-              </button>
-              <button className="btn btn-outline btn-sm btn-premium" onClick={handleDetectJava}>
-                <Search size={14} /> Auto-Detect
-              </button>
+            <div className="flex-col gap-xs" style={{ alignItems: 'flex-end' }}>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Advanced Override: use a specific Java installation</span>
+              <div className="flex gap-sm">
+                <button className="btn btn-outline btn-sm btn-premium" onClick={handleBrowseJava}>
+                  <FolderOpen size={14} /> Browse
+                </button>
+                <button className="btn btn-outline btn-sm btn-premium" onClick={handleDetectJava}>
+                  <Search size={14} /> Auto-Detect
+                </button>
+              </div>
             </div>
           </div>
 
@@ -388,6 +450,57 @@ function SettingsPage() {
                   </button>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* Manage Downloaded Java Versions */}
+        <div className="settings-section">
+          <h2 className="settings-title">Manage Downloaded Java Versions</h2>
+          <p className="settings-description" style={{ marginBottom: 12 }}>
+            These are the JRE versions that have been automatically downloaded and provisioned.
+          </p>
+
+          {provisionedJavas.length === 0 ? (
+            <p className="text-secondary text-sm">No auto-provisioned Java versions found.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {provisionedJavas.map((j, i) => {
+                let major = typeof j === 'object' ? (j.major || j.version) : j
+                let label = typeof j === 'object' ? (j.label || `JRE ${j.major}`) : `JRE ${j}`
+                let pathStr = typeof j === 'object' ? j.path : ''
+                
+                return (
+                  <div 
+                    key={i} 
+                    style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center', 
+                      padding: '12px', 
+                      background: 'var(--bg-tertiary)', 
+                      borderRadius: 8, 
+                      border: '1px solid var(--border)' 
+                    }}
+                  >
+                    <div>
+                      <span style={{ fontWeight: 600, fontSize: 14 }}>{label}</span>
+                      {pathStr && (
+                        <p style={{ fontSize: 11, color: 'var(--text-secondary)', wordBreak: 'break-all', marginTop: 4 }}>
+                          {pathStr}
+                        </p>
+                      )}
+                    </div>
+                    <button 
+                      className="btn btn-outline btn-sm" 
+                      style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                      onClick={() => handleDeleteProvisionedJava(major)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>
