@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, shell } from 'electron'
 import backupManager from '../services/backupManager.js'
 import serverProcess from '../services/serverProcess.js'
 import settingsStore from '../services/settingsStore.js'
@@ -51,5 +51,11 @@ export function registerBackupsIpc(mainWindow) {
       enabled: settingsStore.get('autoBackupEnabled'),
       intervalHours: settingsStore.get('autoBackupInterval')
     }
+  })
+
+  ipcMain.handle('backups:open-folder', async () => {
+    const settings = settingsStore.getAll()
+    const backupsDir = settings.backupsDir
+    await shell.openPath(backupsDir)
   })
 }

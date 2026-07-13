@@ -16,6 +16,7 @@ export function registerMonitoringIpc(mainWindow) {
       monitorService.removeAllListeners('monitor-error')
       monitorService.removeAllListeners('monitor-unavailable')
 
+      /* [TEMPORARILY DISABLED]
       monitorService.on('stats', (stats) => {
         if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.webContents.send('monitoring:stats', stats)
@@ -33,6 +34,7 @@ export function registerMonitoringIpc(mainWindow) {
       })
 
       monitorService.startMonitoring(pid)
+      */
 
       startStatusPolling(mainWindow)
 
@@ -61,7 +63,8 @@ export function registerMonitoringIpc(mainWindow) {
 
   // Stop monitoring when server stops
   serverProcess.on('stopped', () => {
-    monitorService.stopMonitoring()
+    // [TEMPORARILY DISABLED]
+    // monitorService.stopMonitoring()
     stopStatusPolling()
     rconManager.disconnect()
   })

@@ -472,7 +472,7 @@ body {
 
 @media (min-width: 1200px) {
   .dashboard-stats-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr); /* Temporarily changed from 4 to 2 */
   }
 }
 

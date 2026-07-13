@@ -38,7 +38,8 @@ contextBridge.exposeInMainWorld('api', {
     delete: (backupPath) => ipcRenderer.invoke('backups:delete', backupPath),
     list: () => ipcRenderer.invoke('backups:list'),
     setSchedule: (hours) => ipcRenderer.invoke('backups:set-schedule', hours),
-    getSchedule: () => ipcRenderer.invoke('backups:get-schedule')
+    getSchedule: () => ipcRenderer.invoke('backups:get-schedule'),
+    openFolder: () => ipcRenderer.invoke('backups:open-folder')
   },
 
   // ─── Settings ─────────────────────────────────────────────────────

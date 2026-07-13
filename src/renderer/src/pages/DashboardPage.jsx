@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { Play, Square, RotateCcw, Users, Cpu, MemoryStick, Activity, ArrowRight, Archive } from 'lucide-react'
+// import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { Play, Square, RotateCcw, Users, /* Cpu, MemoryStick, */ Activity, /* ArrowRight, */ Archive } from 'lucide-react'
 import { toast } from 'sonner'
 import useServerStore from '../stores/serverStore'
 import useMonitorStore from '../stores/monitorStore'
@@ -18,7 +18,8 @@ function formatUptime(ms) {
 
 function DashboardPage({ onNavigate }) {
   const { status, startTime } = useServerStore()
-  const { cpuHistory, ramHistory, currentCpu, currentRam, players, tps, monitorError } = useMonitorStore()
+  // const { cpuHistory, ramHistory, currentCpu, currentRam, players, tps, monitorError } = useMonitorStore()
+  const { players, tps, monitorError } = useMonitorStore()
   const initMonitorListeners = useMonitorStore(state => state.initListeners)
   const [uptime, setUptime] = useState(0)
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
@@ -156,7 +157,7 @@ function DashboardPage({ onNavigate }) {
 
   // Recharts evaluates functional domains while the history is empty. A
   // numeric fallback prevents an initial NaN axis from taking down the page.
-  const ramDomain = useMemo(() => {
+  /* const ramDomain = useMemo(() => {
     const values = ramHistory.map(point => point.value).filter(Number.isFinite)
     if (values.length === 0) return [0, 1]
     const min = Math.min(...values)
@@ -173,7 +174,7 @@ function DashboardPage({ onNavigate }) {
     fontSize: '16px',
     color: 'var(--text-primary)',
     padding: '8px 12px'
-  }
+  } */
 
   if (loadingSettings) {
     return (
@@ -301,7 +302,7 @@ function DashboardPage({ onNavigate }) {
         </div>
 
         {/* RAM Usage Card */}
-        <div className="card glow-purple">
+        {/* <div className="card glow-purple">
           <div className="card-content" style={{ paddingBottom: 0 }}>
             <div className="card-header">
               <span className="card-title text-pixel"><div className="icon-chip primary"><MemoryStick size={16} /></div>RAM Usage</span>
@@ -328,10 +329,10 @@ function DashboardPage({ onNavigate }) {
           <div className="card-info-bar">
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}><Activity size={14} /> Analytics</span>
           </div>
-        </div>
+        </div> */}
 
         {/* CPU Usage Card */}
-        <div className="card glow-success">
+        {/* <div className="card glow-success">
           <div className="card-content" style={{ paddingBottom: 0 }}>
             <div className="card-header">
               <span className="card-title text-pixel"><div className="icon-chip success"><Cpu size={16} /></div>CPU Usage</span>
@@ -358,7 +359,7 @@ function DashboardPage({ onNavigate }) {
           <div className="card-info-bar">
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}><Activity size={14} /> Analytics</span>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Bottom Row: TPS + Quick Actions */}
@@ -400,9 +401,9 @@ function DashboardPage({ onNavigate }) {
               <button className="btn btn-outline text-pixel btn-quick-action" onClick={handleBackup}>
                 <Archive size={16} /> Backup World
               </button>
-              <button className="btn btn-outline text-pixel btn-quick-action btn-console" onClick={() => onNavigate('console')}>
+              {/* <button className="btn btn-outline text-pixel btn-quick-action btn-console" onClick={() => onNavigate('console')}>
                 <ArrowRight size={16} /> Open Console
-              </button>
+              </button> */}
             </div>
           </div>
         </div>

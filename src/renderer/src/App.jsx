@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Toaster } from 'sonner'
 import Sidebar from './components/layout/Sidebar'
 import DashboardPage from './pages/DashboardPage'
-import ConsolePage from './pages/ConsolePage'
+// import ConsolePage from './pages/ConsolePage'
 import ModsPage from './pages/ModsPage'
 import BackupsPage from './pages/BackupsPage'
 import SettingsPage from './pages/SettingsPage'
@@ -25,7 +25,7 @@ function App() {
   const renderPage = () => {
     switch (activePage) {
       case 'dashboard': return <DashboardPage onNavigate={setActivePage} />
-      case 'console': return <ConsolePage />
+      // case 'console': return <ConsolePage />
       case 'mods': return <ModsPage />
       case 'backups': return <BackupsPage />
       case 'settings': return <SettingsPage />

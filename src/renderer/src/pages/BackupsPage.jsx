@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Archive, RotateCcw, Trash2, Clock, HardDrive } from 'lucide-react'
+import { Archive, RotateCcw, Trash2, Clock, HardDrive, FolderOpen } from 'lucide-react'
 import { toast } from 'sonner'
 import useBackupStore from '../stores/backupStore'
 import Modal from '../components/common/Modal'
@@ -29,11 +29,30 @@ function BackupsPage() {
   const setAutoBackup = useBackupStore(state => state.setAutoBackup)
 
   const [confirmModal, setConfirmModal] = useState(null)
+  const [backupsDir, setBackupsDir] = useState('')
 
   useEffect(() => {
     loadBackups()
     loadAutoBackupConfig()
+    loadSettings()
   }, [])
+
+  const loadSettings = async () => {
+    try {
+      const s = await window.api.settings.get()
+      if (s && s.backupsDir) {
+        setBackupsDir(s.backupsDir)
+      }
+    } catch { /* ignore */ }
+  }
+
+  const handleOpenFolder = async () => {
+    try {
+      await window.api.backups.openFolder()
+    } catch (err) {
+      toast.error(err.message || 'Failed to open backups folder')
+    }
+  }
 
   const loadAutoBackupConfig = async () => {
     try {
@@ -100,14 +119,24 @@ function BackupsPage() {
         <div>
           <h1 className="page-title">Backups</h1>
           <p className="page-subtitle">Manage world backups and auto-backup schedule</p>
-        </div>
-        <button className="btn btn-primary btn-premium glow-accent" onClick={handleCreateBackup} disabled={creating}>
-          {creating ? (
-            <><div className="loading-spinner sm" /> Creating...</>
-          ) : (
-            <><Archive size={16} /> Backup Now</>
+          {backupsDir && (
+            <div style={{ marginTop: 4, fontSize: 13, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 4 }}>
+              📁 {backupsDir}
+            </div>
           )}
-        </button>
+        </div>
+        <div className="flex gap-sm" style={{ alignItems: 'center' }}>
+          <button className="btn btn-outline btn-premium" onClick={handleOpenFolder}>
+            <FolderOpen size={16} /> Open Folder
+          </button>
+          <button className="btn btn-primary btn-premium glow-accent" onClick={handleCreateBackup} disabled={creating}>
+            {creating ? (
+              <><div className="loading-spinner sm" /> Creating...</>
+            ) : (
+              <><Archive size={16} /> Backup Now</>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Auto-backup Config */}
