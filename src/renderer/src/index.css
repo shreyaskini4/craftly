@@ -186,19 +186,19 @@ body {
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
-  padding: var(--space-md);
+  gap: 10px;
+  padding: 12px;
   flex: 1;
 }
 
 .sidebar-item {
   display: flex;
   align-items: center;
-  padding: 8px var(--space-md);
+  padding: 6px 12px;
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast), transform var(--transition-fast);
   cursor: pointer;
-  gap: var(--space-sm);
+  gap: 10px;
   border: 1px solid transparent;
   color: var(--text-secondary);
   text-decoration: none;
@@ -223,9 +223,9 @@ body {
 .sidebar-item.active::before {
   content: '';
   position: absolute;
-  left: -16px;
-  top: 0;
-  bottom: 0;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
   width: 4px;
   background: var(--color-primary);
   box-shadow: 0 0 8px var(--color-primary), 0 0 16px var(--color-primary);
@@ -233,13 +233,16 @@ body {
 }
 
 .sidebar-item .icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sidebar-item .label {
-  font-size: var(--font-xl);
+  font-size: 15px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   line-height: 1;
