@@ -28,6 +28,9 @@ export function registerSettingsIpc(mainWindow) {
       const javaPath = result.filePaths[0]
       const isValid = await validateJavaPath(javaPath)
       if (isValid) {
+        // javaOverride marks this as a deliberate manual choice — server:start will
+        // skip auto-provisioning and use this path unconditionally.
+        settingsStore.set('javaOverride', javaPath)
         settingsStore.set('javaPath', javaPath)
         const serverDir = settingsStore.get('serverDir')
         if (serverDir) {
