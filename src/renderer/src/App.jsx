@@ -5,10 +5,13 @@ import DashboardPage from './pages/DashboardPage'
 import ConsolePage from './pages/ConsolePage'
 import ModsPage from './pages/ModsPage'
 import BackupsPage from './pages/BackupsPage'
+import LogsPage from './pages/LogsPage'
 import SettingsPage from './pages/SettingsPage'
 import ServerPropertiesPage from './pages/ServerPropertiesPage'
 import WelcomePage from './pages/WelcomePage'
 import FaqPage from './pages/FaqPage'
+import FilesPage from './pages/FilesPage'
+import PlayersPage from './pages/PlayersPage'
 import useServerStore from './stores/serverStore'
 
 function App() {
@@ -26,9 +29,12 @@ function App() {
   const renderPage = () => {
     switch (activePage) {
       case 'dashboard': return <DashboardPage onNavigate={setActivePage} />
+      case 'players': return <PlayersPage />
       case 'console': return <ConsolePage />
+      case 'files': return <FilesPage />
       case 'mods': return <ModsPage />
       case 'backups': return <BackupsPage />
+      case 'logs': return <LogsPage />
       case 'settings': return <SettingsPage />
       case 'properties': return <ServerPropertiesPage />
       case 'faq': return <FaqPage />

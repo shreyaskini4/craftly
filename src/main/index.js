@@ -8,6 +8,14 @@ import { registerModsIpc } from './ipc/mods.js'
 import { registerBackupsIpc } from './ipc/backups.js'
 import { registerMonitoringIpc } from './ipc/monitoring.js'
 import { registerSettingsIpc } from './ipc/settings.js'
+import { registerFilesIpc } from './ipc/files.js'
+import { registerWebhooksIpc } from './ipc/webhooks.js'
+import { registerPlayersIpc } from './ipc/players.js'
+import { registerSchedulerIpc } from './ipc/scheduler.js'
+import { registerLogsIpc } from './ipc/logs.js'
+import schedulerService from './services/schedulerService.js'
+import './services/webhookService.js'
+import './services/playerManager.js'
 
 let mainWindow = null
 
@@ -50,6 +58,11 @@ function createWindow() {
   registerBackupsIpc(mainWindow)
   registerMonitoringIpc(mainWindow)
   registerSettingsIpc(mainWindow)
+  registerFilesIpc(mainWindow)
+  registerWebhooksIpc(mainWindow)
+  registerPlayersIpc(mainWindow)
+  registerSchedulerIpc(mainWindow)
+  registerLogsIpc(mainWindow)
 
   // Load renderer
   if (process.env.ELECTRON_RENDERER_URL) {
@@ -62,6 +75,9 @@ function createWindow() {
 app.whenReady().then(() => {
   // Ensure directories exist
   settingsStore.ensureDirectories()
+
+  // Initialize all jobs on startup
+  schedulerService.initAllJobs()
 
   createWindow()
 

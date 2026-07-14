@@ -2,6 +2,7 @@ import { EventEmitter } from 'events'
 import { spawn, execSync } from 'child_process'
 import path from 'path'
 import { ensureRcon } from '../utils/serverProperties.js'
+import settingsStore from './settingsStore.js'
 
 /**
  * Manages the lifecycle of a Minecraft server Java process.
@@ -21,6 +22,10 @@ class ServerProcess extends EventEmitter {
     this.running = false
     this.startTime = null
     this.lastConfig = null
+    this.intentionalStop = false
+    this.crashCount = 0
+    this.crashResetTimer = null
+    this.restartTimer = null
   }
 
   get isRunning() {
@@ -49,6 +54,12 @@ class ServerProcess extends EventEmitter {
         return
       }
 
+      this.intentionalStop = false
+      if (this.crashResetTimer) {
+        clearTimeout(this.crashResetTimer)
+        this.crashResetTimer = null
+      }
+
       const { javaPath = 'java', jarPath, xmx = '4G', xms = '2G', serverDir, rconPort, rconPassword } = config
       this.lastConfig = config
 
@@ -75,6 +86,12 @@ class ServerProcess extends EventEmitter {
       this.running = true
       this.startTime = Date.now()
       this.emit('status', 'starting')
+
+      this.crashResetTimer = setTimeout(() => {
+        if (this.running) {
+          this.crashCount = 0
+        }
+      }, 60000)
 
       let stdoutBuffer = ''
       let stderrBuffer = ''
@@ -129,8 +146,35 @@ class ServerProcess extends EventEmitter {
       this.process.on('close', (code) => {
         this.running = false
         this.process = null
-        this.emit('status', 'offline')
-        this.emit('stopped', code)
+
+        if (!this.intentionalStop) {
+          const autoRestart = settingsStore.get('autoRestartOnCrash')
+          if (autoRestart === false) {
+            this.emit('status', 'offline')
+            this.emit('stopped', code)
+          } else {
+            this.crashCount++
+            const maxRetries = settingsStore.get('autoRestartMaxRetries') ?? 5
+            if (this.crashCount > maxRetries) {
+              this.emit('status', 'offline')
+              this.emit('crashed', { fatal: true, attempts: this.crashCount, message: 'Max restarts exceeded' })
+              this.crashCount = 0
+              this.emit('stopped', code)
+            } else {
+              const delay = Math.min(5000 * Math.pow(2, this.crashCount - 1), 60000)
+              this.emit('status', 'crashed')
+              this.emit('crashed', { fatal: false, attempt: this.crashCount, nextRetryMs: delay })
+              this.restartTimer = setTimeout(() => {
+                this.start(this.lastConfig).catch((err) => {
+                  console.error('Auto-restart start error:', err)
+                })
+              }, delay)
+            }
+          }
+        } else {
+          this.emit('status', 'offline')
+          this.emit('stopped', code)
+        }
       })
 
       this.process.on('error', (err) => {
@@ -153,6 +197,16 @@ class ServerProcess extends EventEmitter {
    * @returns {Promise<void>}
    */
   async stop() {
+    this.intentionalStop = true
+    if (this.restartTimer) {
+      clearTimeout(this.restartTimer)
+      this.restartTimer = null
+    }
+    if (this.crashResetTimer) {
+      clearTimeout(this.crashResetTimer)
+      this.crashResetTimer = null
+    }
+
     if (!this.running || !this.process) {
       throw new Error('Server is not running')
     }
@@ -181,6 +235,16 @@ class ServerProcess extends EventEmitter {
    * @returns {Promise<void>}
    */
   async restart() {
+    this.intentionalStop = true
+    if (this.restartTimer) {
+      clearTimeout(this.restartTimer)
+      this.restartTimer = null
+    }
+    if (this.crashResetTimer) {
+      clearTimeout(this.crashResetTimer)
+      this.crashResetTimer = null
+    }
+
     if (this.running) {
       await this.stop()
     }
@@ -222,6 +286,16 @@ class ServerProcess extends EventEmitter {
    * Use only as a last resort when graceful shutdown fails.
    */
   kill() {
+    this.intentionalStop = true
+    if (this.restartTimer) {
+      clearTimeout(this.restartTimer)
+      this.restartTimer = null
+    }
+    if (this.crashResetTimer) {
+      clearTimeout(this.crashResetTimer)
+      this.crashResetTimer = null
+    }
+
     if (this.process) {
       this._forceKill()
       this.running = false
@@ -235,6 +309,16 @@ class ServerProcess extends EventEmitter {
    * @private
    */
   _forceKill() {
+    this.intentionalStop = true
+    if (this.restartTimer) {
+      clearTimeout(this.restartTimer)
+      this.restartTimer = null
+    }
+    if (this.crashResetTimer) {
+      clearTimeout(this.crashResetTimer)
+      this.crashResetTimer = null
+    }
+
     if (!this.process) return
     try {
       if (process.platform === 'win32') {

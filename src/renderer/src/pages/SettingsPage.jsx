@@ -18,6 +18,75 @@ function SettingsPage() {
   const [javaInstalls, setJavaInstalls] = useState([])
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [provisionedJavas, setProvisionedJavas] = useState([])
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [webhookToggles, setWebhookToggles] = useState({
+    start: true,
+    stop: true,
+    crash: true,
+    backup: true
+  })
+  const [testingWebhook, setTestingWebhook] = useState(false)
+
+  // Scheduled task states
+  const [scheduledJobs, setScheduledJobs] = useState([])
+  const [newJobName, setNewJobName] = useState('')
+  const [newJobType, setNewJobType] = useState('restart')
+  const [newJobInterval, setNewJobInterval] = useState('12')
+  const [newJobWarning, setNewJobWarning] = useState('60')
+  const [newJobCommand, setNewJobCommand] = useState('')
+
+  const loadWebhookConfig = async () => {
+    try {
+      const config = await window.api.webhooks.getConfig()
+      if (config) {
+        setWebhookUrl(config.url || '')
+        if (config.toggles) {
+          setWebhookToggles(config.toggles)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load webhook config:', err)
+    }
+  }
+
+  const handleWebhookUrlChange = async (url) => {
+    setWebhookUrl(url)
+    try {
+      await window.api.webhooks.setConfig({ url, toggles: webhookToggles })
+    } catch (err) {
+      toast.error('Failed to save webhook URL')
+    }
+  }
+
+  const handleWebhookToggleChange = async (key, checked) => {
+    const nextToggles = { ...webhookToggles, [key]: checked }
+    setWebhookToggles(nextToggles)
+    try {
+      await window.api.webhooks.setConfig({ url: webhookUrl, toggles: nextToggles })
+    } catch (err) {
+      toast.error('Failed to save webhook event settings')
+    }
+  }
+
+  const handleTestWebhook = async () => {
+    if (!webhookUrl) {
+      toast.error('Please enter a Discord Webhook URL first')
+      return
+    }
+    setTestingWebhook(true)
+    try {
+      const success = await window.api.webhooks.test(webhookUrl)
+      if (success) {
+        toast.success('Test notification sent successfully!')
+      } else {
+        toast.error('Failed to send test notification. Check the URL and try again.')
+      }
+    } catch (err) {
+      toast.error(`Error sending test notification: ${err.message}`)
+    } finally {
+      setTestingWebhook(false)
+    }
+  }
 
   const loadProvisionedJava = async () => {
     try {
@@ -39,10 +108,83 @@ function SettingsPage() {
     }
   }
 
+  const loadScheduledJobs = async () => {
+    try {
+      const list = await window.api.scheduler.list()
+      setScheduledJobs(list || [])
+    } catch (err) {
+      console.error('Failed to load scheduled tasks:', err)
+    }
+  }
+
+  const handleAddJob = async (e) => {
+    e.preventDefault()
+    if (!newJobName.trim()) {
+      toast.error('Please enter a task name')
+      return
+    }
+    const intervalVal = parseFloat(newJobInterval)
+    if (isNaN(intervalVal) || intervalVal <= 0) {
+      toast.error('Please enter a valid interval greater than 0 hours')
+      return
+    }
+    if (newJobType === 'command' && !newJobCommand.trim()) {
+      toast.error('Please enter a command to execute')
+      return
+    }
+    const warningVal = parseInt(newJobWarning)
+    if (newJobType === 'restart' && (isNaN(warningVal) || warningVal < 0)) {
+      toast.error('Warning seconds must be a positive integer or 0')
+      return
+    }
+
+    try {
+      await window.api.scheduler.add({
+        name: newJobName.trim(),
+        type: newJobType,
+        intervalHours: intervalVal,
+        warningSeconds: newJobType === 'restart' ? warningVal : 0,
+        command: newJobType === 'command' ? newJobCommand.trim() : '',
+        enabled: true
+      })
+      toast.success('Scheduled task added successfully!')
+      setNewJobName('')
+      setNewJobType('restart')
+      setNewJobInterval('12')
+      setNewJobWarning('60')
+      setNewJobCommand('')
+      loadScheduledJobs()
+    } catch (err) {
+      toast.error(`Failed to add task: ${err.message}`)
+    }
+  }
+
+  const handleDeleteJob = async (id) => {
+    try {
+      await window.api.scheduler.remove(id)
+      toast.success('Scheduled task removed')
+      loadScheduledJobs()
+    } catch (err) {
+      toast.error(`Failed to remove task: ${err.message}`)
+    }
+  }
+
+  const handleToggleJob = async (id, currentEnabled) => {
+    try {
+      await window.api.scheduler.update(id, { enabled: !currentEnabled })
+      toast.success(!currentEnabled ? 'Task enabled' : 'Task disabled')
+      loadScheduledJobs()
+    } catch (err) {
+      toast.error(`Failed to update task: ${err.message}`)
+    }
+  }
+
   // Load settings on mount
   useEffect(() => {
     loadSettings()
     loadProvisionedJava()
+    loadWebhookConfig()
+    loadScheduledJobs()
     
     window.api.settings.detectJava()
       .then(setJavaInstalls)
@@ -55,6 +197,14 @@ function SettingsPage() {
     return () => {
       window.api.removeListener.downloadProgress(handler)
     }
+  }, [])
+
+  // Auto-refresh next run times for active scheduled jobs
+  useEffect(() => {
+    const timer = setInterval(() => {
+      loadScheduledJobs()
+    }, 5000)
+    return () => clearInterval(timer)
   }, [])
 
   const isMountedRef = useRef(false)
@@ -621,6 +771,295 @@ function SettingsPage() {
               </div>
             </>
           )}
+        </div>
+
+        {/* Crash Detection & Auto-Restart */}
+        <div className="settings-section">
+          <h2 className="settings-title">Crash Detection & Auto-Restart</h2>
+
+          <div className="settings-row">
+            <div>
+              <label className="settings-label">Auto-Restart on Crash</label>
+              <p className="settings-description">Automatically restart the server if it stops unexpectedly</p>
+            </div>
+            <label className="toggle">
+              <input
+                type="checkbox"
+                checked={settings.autoRestartOnCrash ?? true}
+                onChange={e => updateSetting('autoRestartOnCrash', e.target.checked)}
+              />
+              <span className="toggle-slider" />
+            </label>
+          </div>
+
+          <div className="settings-row">
+            <div>
+              <label className="settings-label">Max Auto-Restart Attempts</label>
+              <p className="settings-description">Number of sequential restart attempts before giving up</p>
+            </div>
+            <input
+              className="input"
+              type="number"
+              min="1"
+              max="20"
+              value={settings.autoRestartMaxRetries ?? 5}
+              onChange={e => updateSetting('autoRestartMaxRetries', parseInt(e.target.value) || 5)}
+              disabled={!(settings.autoRestartOnCrash ?? true)}
+              style={{ width: 120 }}
+            />
+          </div>
+        </div>
+
+        {/* Scheduled Tasks / Automation */}
+        <div className="settings-section">
+          <h2 className="settings-title">Scheduled Tasks / Automation</h2>
+          <p className="settings-description" style={{ marginBottom: 16 }}>
+            Automate server management tasks, such as periodic restarts or executing commands.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+            {scheduledJobs.length === 0 ? (
+              <p className="text-secondary text-sm">No scheduled tasks configured.</p>
+            ) : (
+              scheduledJobs.map((job) => (
+                <div
+                  key={job.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '12px 16px',
+                    background: 'var(--bg-tertiary)',
+                    borderRadius: 8,
+                    border: '1px solid var(--border)'
+                  }}
+                >
+                  <div style={{ flex: 1, marginRight: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontWeight: 600, fontSize: 14 }}>{job.name}</span>
+                      <span className={`badge ${job.enabled ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: 11 }}>
+                        {job.enabled ? 'Active' : 'Disabled'}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
+                      {job.type === 'restart'
+                        ? `Restart server every ${job.intervalHours} hours${job.warningSeconds ? ` with ${job.warningSeconds}s warning` : ''}`
+                        : `Run command '${job.command}' every ${job.intervalHours} hours`}
+                    </p>
+                    {job.enabled && job.nextRunTime && (
+                      <p style={{ fontSize: 11, color: 'var(--accent)', marginTop: 4 }}>
+                        Next run: {new Date(job.nextRunTime).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <label className="toggle">
+                      <input
+                        type="checkbox"
+                        checked={job.enabled}
+                        onChange={() => handleToggleJob(job.id, job.enabled)}
+                      />
+                      <span className="toggle-slider" />
+                    </label>
+                    <button
+                      className="btn btn-outline btn-sm"
+                      style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                      onClick={() => handleDeleteJob(job.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <form onSubmit={handleAddJob} style={{ marginTop: 20, padding: '16px', background: 'var(--bg-tertiary)', borderRadius: 8, border: '1px solid var(--border)' }}>
+            <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Add New Scheduled Task</h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: 12 }}>
+                <label style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Task Name</label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="e.g. Daily Restart"
+                  value={newJobName}
+                  onChange={e => setNewJobName(e.target.value)}
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: 12 }}>
+                <label style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Task Type</label>
+                <select
+                  className="select"
+                  value={newJobType}
+                  onChange={e => setNewJobType(e.target.value)}
+                  style={{ width: 180 }}
+                >
+                  <option value="restart">Restart Server</option>
+                  <option value="command">Run Command</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: 12 }}>
+                <label style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Interval (hours)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  className="input"
+                  placeholder="e.g. 12"
+                  value={newJobInterval}
+                  onChange={e => setNewJobInterval(e.target.value)}
+                  style={{ width: 120 }}
+                />
+              </div>
+
+              {newJobType === 'restart' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: 12 }}>
+                  <label style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Warning Countdown (s)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="input"
+                    placeholder="e.g. 60"
+                    value={newJobWarning}
+                    onChange={e => setNewJobWarning(e.target.value)}
+                    style={{ width: 120 }}
+                  />
+                </div>
+              )}
+
+              {newJobType === 'command' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: 12 }}>
+                  <label style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Command</label>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="e.g. save-all"
+                    value={newJobCommand}
+                    onChange={e => setNewJobCommand(e.target.value)}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+                <button type="submit" className="btn btn-primary btn-sm btn-premium glow-accent">
+                  Add Task
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        {/* Discord Webhook Notifications */}
+        <div className="settings-section">
+          <h2 className="settings-title">Discord Webhook Notifications</h2>
+          <p className="settings-description" style={{ marginBottom: 16 }}>
+            Receive real-time notifications on your Discord server when status changes occur.
+          </p>
+
+          <div className="settings-row">
+            <div>
+              <label className="settings-label">Discord Webhook URL</label>
+              <p className="settings-description">POST requests will be sent to this URL when enabled events occur</p>
+            </div>
+            <div className="flex gap-sm" style={{ width: '60%', justifyContent: 'flex-end' }}>
+              <input
+                className="input"
+                type="text"
+                placeholder="https://discord.com/api/webhooks/..."
+                value={webhookUrl}
+                onChange={e => handleWebhookUrlChange(e.target.value)}
+                style={{ flex: 1, minWidth: 200 }}
+              />
+              <button 
+                className="btn btn-outline btn-sm btn-premium" 
+                onClick={handleTestWebhook}
+                disabled={testingWebhook || !webhookUrl}
+              >
+                {testingWebhook ? 'Sending...' : 'Send Test'}
+              </button>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500, display: 'block', marginBottom: 12 }}>
+              Notification Events
+            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="settings-row" style={{ paddingTop: 8, paddingBottom: 8 }}>
+                <div>
+                  <label className="settings-label">Server Started</label>
+                  <p className="settings-description-sub" style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    Notify when the server goes online and is ready for players
+                  </p>
+                </div>
+                <label className="toggle">
+                  <input
+                    type="checkbox"
+                    checked={webhookToggles.start ?? true}
+                    onChange={e => handleWebhookToggleChange('start', e.target.checked)}
+                  />
+                  <span className="toggle-slider" />
+                </label>
+              </div>
+
+              <div className="settings-row" style={{ paddingTop: 8, paddingBottom: 8 }}>
+                <div>
+                  <label className="settings-label">Server Stopped</label>
+                  <p className="settings-description-sub" style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    Notify when the server is stopped or shut down
+                  </p>
+                </div>
+                <label className="toggle">
+                  <input
+                    type="checkbox"
+                    checked={webhookToggles.stop ?? true}
+                    onChange={e => handleWebhookToggleChange('stop', e.target.checked)}
+                  />
+                  <span className="toggle-slider" />
+                </label>
+              </div>
+
+              <div className="settings-row" style={{ paddingTop: 8, paddingBottom: 8 }}>
+                <div>
+                  <label className="settings-label">Server Crashed</label>
+                  <p className="settings-description-sub" style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    Notify when the server crashes or fails to restart
+                  </p>
+                </div>
+                <label className="toggle">
+                  <input
+                    type="checkbox"
+                    checked={webhookToggles.crash ?? true}
+                    onChange={e => handleWebhookToggleChange('crash', e.target.checked)}
+                  />
+                  <span className="toggle-slider" />
+                </label>
+              </div>
+
+              <div className="settings-row" style={{ paddingTop: 8, paddingBottom: 8 }}>
+                <div>
+                  <label className="settings-label">Backup Complete</label>
+                  <p className="settings-description-sub" style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    Notify when a world/server backup has successfully finished
+                  </p>
+                </div>
+                <label className="toggle">
+                  <input
+                    type="checkbox"
+                    checked={webhookToggles.backup ?? true}
+                    onChange={e => handleWebhookToggleChange('backup', e.target.checked)}
+                  />
+                  <span className="toggle-slider" />
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* App Settings */}

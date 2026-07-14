@@ -62,6 +62,45 @@ contextBridge.exposeInMainWorld('api', {
     write: (props) => ipcRenderer.invoke('properties:write', props)
   },
 
+  // ─── Files ────────────────────────────────────────────────────────
+  files: {
+    list: (path) => ipcRenderer.invoke('files:list', path),
+    read: (path) => ipcRenderer.invoke('files:read', path),
+    write: (path, content) => ipcRenderer.invoke('files:write', path, content),
+    delete: (path) => ipcRenderer.invoke('files:delete', path),
+    rename: (oldPath, newPath) => ipcRenderer.invoke('files:rename', oldPath, newPath),
+    createDir: (path) => ipcRenderer.invoke('files:create-dir', path),
+    createFile: (path) => ipcRenderer.invoke('files:create-file', path)
+  },
+
+  // ─── Webhooks ─────────────────────────────────────────────────────
+  webhooks: {
+    test: (url) => ipcRenderer.invoke('webhooks:test', url),
+    getConfig: () => ipcRenderer.invoke('webhooks:get-config'),
+    setConfig: (data) => ipcRenderer.invoke('webhooks:set-config', data)
+  },
+
+  // ─── Player Management ─────────────────────────────────────────────
+  players: {
+    kick: (name, reason) => ipcRenderer.invoke('players:kick', name, reason),
+    ban: (name, reason) => ipcRenderer.invoke('players:ban', name, reason),
+    unban: (name) => ipcRenderer.invoke('players:unban', name),
+    op: (name) => ipcRenderer.invoke('players:op', name),
+    deop: (name) => ipcRenderer.invoke('players:deop', name),
+    whitelistAdd: (name) => ipcRenderer.invoke('players:whitelist-add', name),
+    whitelistRemove: (name) => ipcRenderer.invoke('players:whitelist-remove', name),
+    getState: () => ipcRenderer.invoke('players:get-state'),
+    getHistory: () => ipcRenderer.invoke('players:get-history')
+  },
+
+  // ─── Scheduled Tasks / Automation ──────────────────────────────────
+  scheduler: {
+    list: () => ipcRenderer.invoke('scheduler:list'),
+    add: (job) => ipcRenderer.invoke('scheduler:add', job),
+    update: (id, config) => ipcRenderer.invoke('scheduler:update', id, config),
+    remove: (id) => ipcRenderer.invoke('scheduler:remove', id)
+  },
+
   // ─── Event Listeners (main → renderer push channels) ──────────────
   on: {
     consoleLine: (callback) => {
@@ -98,7 +137,8 @@ contextBridge.exposeInMainWorld('api', {
       const handler = (_event, progress) => callback(progress)
       ipcRenderer.on('backup:progress', handler)
       return handler
-    }
+    },
+    crashInfo: (cb) => ipcRenderer.on('server:crash-info', (event, data) => cb(data))
   },
 
   // ─── Remove Listeners (cleanup) ───────────────────────────────────
@@ -151,7 +191,22 @@ contextBridge.exposeInMainWorld('api', {
       } else {
         ipcRenderer.removeAllListeners('backup:progress')
       }
+    },
+    crashInfo: (handler) => {
+      if (handler) {
+        ipcRenderer.removeListener('server:crash-info', handler)
+      } else {
+        ipcRenderer.removeAllListeners('server:crash-info')
+      }
     }
+  },
+
+  // ─── Logs and Crash Reports ───────────────────────────────────────
+  logs: {
+    listLogs: () => ipcRenderer.invoke('logs:list-logs'),
+    listCrashReports: () => ipcRenderer.invoke('logs:list-crash-reports'),
+    readLog: (filename) => ipcRenderer.invoke('logs:read-log', filename),
+    readCrashReport: (filename) => ipcRenderer.invoke('logs:read-crash-report', filename)
   },
 
   // ─── Window Controls ──────────────────────────────────────────────

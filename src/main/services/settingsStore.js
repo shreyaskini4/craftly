@@ -27,7 +27,12 @@ const defaults = {
   autoBackupInterval: 6,
   installedMods: [],
   onboardingComplete: false,
-  serverJar: ''
+  serverJar: '',
+  autoRestartOnCrash: true,
+  autoRestartMaxRetries: 5,
+  discordWebhookUrl: '',
+  discordWebhookEvents: { start: true, stop: true, crash: true, backup: true },
+  scheduledJobs: []
 }
 
 const store = new Store({

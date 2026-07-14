@@ -97,6 +97,13 @@ async function resolveJavaPath(serverDir, mcVersion, mainWindow) {
 }
 
 export function registerServerIpc(mainWindow) {
+  serverProcess.removeAllListeners('crashed')
+  serverProcess.on('crashed', (info) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('server:crash-info', info)
+    }
+  })
+
   ipcMain.handle('server:start', async () => {
     const settings = settingsStore.getAll()
     const serverDir = settings.serverDir

@@ -11,6 +11,7 @@ const useServerStore = create((set, get) => ({
   consoleLines: [],
   pid: null,
   startTime: null,
+  crashInfo: null,
 
   addConsoleLine: (lineData) => {
     const id = ++lineIdCounter
@@ -49,6 +50,9 @@ const useServerStore = create((set, get) => ({
 
   setStatus: (status) => {
     set({ status })
+    if (status !== 'crashed') {
+      set({ crashInfo: null })
+    }
     if (status === 'online') {
       set({ startTime: Date.now() })
     } else if (status === 'offline') {
@@ -77,6 +81,10 @@ const useServerStore = create((set, get) => ({
 
     window.api.on.serverStatus((status) => {
       useServerStore.getState().setStatus(status)
+    })
+
+    window.api.on.crashInfo((info) => {
+      set({ crashInfo: info })
     })
   }
 }))

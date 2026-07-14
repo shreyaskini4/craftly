@@ -17,7 +17,7 @@ function formatUptime(ms) {
 }
 
 function DashboardPage({ onNavigate }) {
-  const { status, startTime } = useServerStore()
+  const { status, startTime, crashInfo } = useServerStore()
   // const { cpuHistory, ramHistory, currentCpu, currentRam, players, tps, monitorError } = useMonitorStore()
   const { players, tps, monitorError } = useMonitorStore()
   const initMonitorListeners = useMonitorStore(state => state.initListeners)
@@ -28,6 +28,7 @@ function DashboardPage({ onNavigate }) {
   const [settings, setSettings] = useState(null)
   const [versions, setVersions] = useState([])
   const [fetchingVersions, setFetchingVersions] = useState(false)
+  const [secondsLeft, setSecondsLeft] = useState(0)
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -102,6 +103,22 @@ function DashboardPage({ onNavigate }) {
       setUptime(0)
     }
   }, [status, startTime])
+
+  useEffect(() => {
+    if (status === 'crashed' && crashInfo && !crashInfo.fatal && crashInfo.nextRetryMs) {
+      setSecondsLeft(Math.ceil(crashInfo.nextRetryMs / 1000))
+      const interval = setInterval(() => {
+        setSecondsLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+      return () => clearInterval(interval)
+    }
+  }, [status, crashInfo])
 
   const handleStart = async () => {
     try {
@@ -254,6 +271,46 @@ function DashboardPage({ onNavigate }) {
           )}
         </div>
       </div>
+
+      {crashInfo && (
+        <div style={{
+          background: crashInfo.fatal ? 'rgba(244, 63, 94, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+          color: crashInfo.fatal ? '#f43f5e' : '#f59e0b',
+          border: `1px solid ${crashInfo.fatal ? 'rgba(244, 63, 94, 0.4)' : 'rgba(245, 158, 11, 0.4)'}`,
+          padding: '16px 20px',
+          borderRadius: 'var(--radius-md)',
+          marginBottom: 'var(--space-lg)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 'var(--space-md)',
+          boxShadow: crashInfo.fatal ? '0 0 15px rgba(244, 63, 94, 0.15)' : '0 0 15px rgba(245, 158, 11, 0.15)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '24px' }}>{crashInfo.fatal ? '🚨' : '⚠️'}</span>
+            <div>
+              <h4 style={{ margin: 0, fontWeight: 700, fontSize: '16px' }}>
+                {crashInfo.fatal ? 'Fatal Server Crash' : 'Server Crashed!'}
+              </h4>
+              <p style={{ margin: '4px 0 0 0', fontSize: '14px', opacity: 0.9 }}>
+                {crashInfo.fatal
+                  ? 'Server crashed repeatedly. Auto-restart disabled until manual intervention.'
+                  : `Server crashed! Auto-restarting in ${secondsLeft} seconds... (Attempt ${crashInfo.attempt} of ${settings?.autoRestartMaxRetries ?? 5})`
+                }
+              </p>
+            </div>
+          </div>
+          {crashInfo.fatal && (
+            <button
+              className="btn btn-danger no-drag"
+              onClick={handleStart}
+              style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <Play size={16} /> Start Server
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="dashboard-bento-grid">
         {/* Server Status Card */}
