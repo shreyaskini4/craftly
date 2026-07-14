@@ -186,7 +186,7 @@ body {
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
   padding: 12px;
   flex: 1;
 }
@@ -194,11 +194,11 @@ body {
 .sidebar-item {
   display: flex;
   align-items: center;
-  padding: 6px 12px;
+  padding: 10px 14px;
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast), transform var(--transition-fast);
   cursor: pointer;
-  gap: 10px;
+  gap: 12px;
   border: 1px solid transparent;
   color: var(--text-secondary);
   text-decoration: none;
@@ -224,8 +224,8 @@ body {
   content: '';
   position: absolute;
   left: 0;
-  top: 4px;
-  bottom: 4px;
+  top: 8px;
+  bottom: 8px;
   width: 4px;
   background: var(--color-primary);
   box-shadow: 0 0 8px var(--color-primary), 0 0 16px var(--color-primary);
@@ -471,15 +471,47 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
-.dashboard-stats-grid {
+/* ── Dashboard Bento Grid ── */
+.dashboard-bento-grid {
   display: grid;
   gap: var(--space-md);
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .dashboard-bento-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dashboard-bento-grid .card-status {
+    grid-column: span 2;
+  }
+  .dashboard-bento-grid .card-quick-actions {
+    grid-column: span 2;
+  }
 }
 
 @media (min-width: 1200px) {
-  .dashboard-stats-grid {
-    grid-template-columns: repeat(2, 1fr); /* Temporarily changed from 4 to 2 */
+  .dashboard-bento-grid {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto;
+  }
+  .dashboard-bento-grid .card-status {
+    grid-column: span 2;
+    grid-row: 1;
+  }
+  .dashboard-bento-grid .card-players {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    display: flex;
+    flex-direction: column;
+  }
+  .dashboard-bento-grid .card-tps {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .dashboard-bento-grid .card-quick-actions {
+    grid-column: 2;
+    grid-row: 2;
   }
 }
 

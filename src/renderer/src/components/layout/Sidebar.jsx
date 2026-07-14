@@ -4,7 +4,7 @@ import useServerStore from '../../stores/serverStore'
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'console', label: 'Console', icon: Terminal },
+  { id: 'console', label: 'Terminal', icon: Terminal },
   { id: 'mods', label: 'Mods', icon: Package },
   { id: 'backups', label: 'Backups', icon: Archive },
   { id: 'properties', label: 'Server Properties', icon: Sliders },

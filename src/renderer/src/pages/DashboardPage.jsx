@@ -255,9 +255,9 @@ function DashboardPage({ onNavigate }) {
         </div>
       </div>
 
-      <div className="dashboard-stats-grid">
+      <div className="dashboard-bento-grid">
         {/* Server Status Card */}
-        <div className={`card ${status === 'online' ? 'glow-online' : status === 'offline' ? 'glow-offline' : 'glow-starting'}`}>
+        <div className={`card card-status ${status === 'online' ? 'glow-online' : status === 'offline' ? 'glow-offline' : 'glow-starting'}`}>
           <div className="card-content">
             <div className="card-header">
               <span className="card-title text-pixel">Server Status</span>
@@ -272,8 +272,8 @@ function DashboardPage({ onNavigate }) {
         </div>
 
         {/* Players Card */}
-        <div className={`card ${isOnline && players.online > 0 ? 'glow-success' : ''}`}>
-          <div className="card-content">
+        <div className={`card card-players ${isOnline && players.online > 0 ? 'glow-success' : ''}`}>
+          <div className="card-content" style={{ flex: 1 }}>
             <div className="card-header">
               <span className="card-title text-pixel"><div className="icon-chip primary"><Users size={16} /></div>Players</span>
             </div>
@@ -301,70 +301,8 @@ function DashboardPage({ onNavigate }) {
           </div>
         </div>
 
-        {/* RAM Usage Card */}
-        {/* <div className="card glow-purple">
-          <div className="card-content" style={{ paddingBottom: 0 }}>
-            <div className="card-header">
-              <span className="card-title text-pixel"><div className="icon-chip primary"><MemoryStick size={16} /></div>RAM Usage</span>
-            </div>
-            <div className="card-value text-pixel glow-text-primary">{currentRam.used}</div>
-            <div className="chart-container" style={{ marginTop: 'auto', paddingTop: 'var(--space-md)', flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: '80px' }}>
-              <ResponsiveContainer width="100%" height="100%" style={{ flexGrow: 1 }}>
-                <AreaChart data={ramHistory} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                  <defs>
-                    <linearGradient id="ramGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.6} />
-                      <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke="rgba(147, 51, 234, 0.08)" strokeDasharray="3 3" />
-                  <XAxis dataKey="time" hide />
-                  <YAxis hide domain={ramDomain} />
-                  <Tooltip contentStyle={chartTooltipStyle} className="custom-chart-tooltip" formatter={(v) => [`${Number(v).toFixed(2)} GB`, 'RAM']} />
-                  <Area type="monotone" dataKey="value" stroke="var(--color-primary)" fill="url(#ramGradient)" strokeWidth={2} dot={false} isAnimationActive animationDuration={300} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div className="card-info-bar">
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}><Activity size={14} /> Analytics</span>
-          </div>
-        </div> */}
-
-        {/* CPU Usage Card */}
-        {/* <div className="card glow-success">
-          <div className="card-content" style={{ paddingBottom: 0 }}>
-            <div className="card-header">
-              <span className="card-title text-pixel"><div className="icon-chip success"><Cpu size={16} /></div>CPU Usage</span>
-            </div>
-            <div className="card-value text-pixel glow-text-success">{currentCpu}<span style={{ fontSize: 'var(--font-base)', color: 'var(--text-tertiary)' }}>%</span></div>
-            <div className="chart-container" style={{ marginTop: 'auto', paddingTop: 'var(--space-md)', flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: '80px' }}>
-              <ResponsiveContainer width="100%" height="100%" style={{ flexGrow: 1 }}>
-                <AreaChart data={cpuHistory} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                  <defs>
-                    <linearGradient id="cpuGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-success)" stopOpacity={0.6} />
-                      <stop offset="95%" stopColor="var(--color-success)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke="rgba(16, 185, 129, 0.08)" strokeDasharray="3 3" />
-                  <XAxis dataKey="time" hide />
-                  <YAxis hide domain={[0, 100]} />
-                  <Tooltip contentStyle={chartTooltipStyle} className="custom-chart-tooltip" formatter={(v) => [`${v}%`, 'CPU']} />
-                  <Area type="monotone" dataKey="value" stroke="var(--color-success)" fill="url(#cpuGradient)" strokeWidth={2} dot={false} isAnimationActive animationDuration={300} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div className="card-info-bar">
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}><Activity size={14} /> Analytics</span>
-          </div>
-        </div> */}
-      </div>
-
-      {/* Bottom Row: TPS + Quick Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2.5fr', gap: 'var(--space-md)', marginTop: 'var(--space-md)' }}>
-        <div className={`card ${!tpsError && isOnline && tpsValue >= 18 ? 'glow-success' : !tpsError && isOnline && tpsValue >= 15 ? 'glow-warning' : !tpsError && isOnline && tpsValue !== null ? 'glow-danger' : ''}`}>
+        {/* TPS Card */}
+        <div className={`card card-tps ${!tpsError && isOnline && tpsValue >= 18 ? 'glow-success' : !tpsError && isOnline && tpsValue >= 15 ? 'glow-warning' : !tpsError && isOnline && tpsValue !== null ? 'glow-danger' : ''}`}>
           <div className="card-content">
             <div className="card-header">
               <span className="card-title text-pixel"><div className={`icon-chip ${tpsIconClass}`.trim()}><Activity size={16} /></div>TPS</span>
@@ -389,7 +327,8 @@ function DashboardPage({ onNavigate }) {
           </div>
         </div>
 
-        <div className="card glow-purple">
+        {/* Quick Actions Card */}
+        <div className="card card-quick-actions glow-purple">
           <div className="card-content">
             <div className="card-header">
               <span className="card-title text-pixel">Quick Actions</span>
@@ -402,7 +341,7 @@ function DashboardPage({ onNavigate }) {
                 <Archive size={16} /> Backup World
               </button>
               <button className="btn btn-outline text-pixel btn-quick-action btn-console" onClick={() => onNavigate('console')}>
-                <ArrowRight size={16} /> Open Console
+                <ArrowRight size={16} /> Open Terminal
               </button>
             </div>
           </div>
