@@ -1,5 +1,13 @@
-appId: com.mcservergui.app
+appId: com.craftly.app
 productName: Craftly
+# Auto-update distribution feeds configuration.
+# IMPORTANT: You must change "PLACEHOLDER_OWNER" and "PLACEHOLDER_REPO" to your actual
+# GitHub username/organization and repository name respectively to allow releases to be
+# published and fetched by the auto-updater.
+publish:
+  provider: github
+  owner: "PLACEHOLDER_OWNER"
+  repo: "PLACEHOLDER_REPO"
 directories:
   buildResources: build
 files:
@@ -10,6 +18,20 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 win:
   executableName: craftly
+  # Custom signing hook to sign the build outputs. 
+  # Using a script/hook is the preferred method for modern cloud-based workflows (Azure Trusted Signing, SignPath).
+  sign: "./build/sign.js"
+  
+  # For reference: Traditional Windows code-signing configuration (local PFX certificates):
+  # -------------------------------------------------------------------------------------
+  # certificateFile: "./build/certificate.pfx"      # Or use CSC_LINK environment variable
+  # certificatePassword: "CERT_PASSWORD_HERE"       # Or use CSC_KEY_PASSWORD environment variable
+  # certificateSubjectName: "Company Name"           # Optional: Specify certificate subject name
+  # certificateSha1: "THUMBPRINT"                    # Optional: Specify SHA1 thumbprint of certificate in local store
+  # signingHashAlgorithms:                           # Optional: Hash algorithms to use
+  #   - sha256
+  # rfc3161TimeStampServer: "http://timestamp.digicert.com" # Optional: Timestamp server URL
+  
   target:
     - nsis
 nsis:
@@ -17,3 +39,14 @@ nsis:
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+mac:
+  target:
+    - dmg
+    - zip
+  # Note: icon.icns should be placed in the build resources directory (build/icon.icns) for macOS builds.
+linux:
+  target:
+    - AppImage
+    - deb
+  # Note: Linux builds will utilize the default build/icon.png icon.
+

@@ -1,5 +1,6 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, dialog } from 'electron'
 import { join } from 'path'
+import { autoUpdater } from 'electron-updater'
 import serverProcess from './services/serverProcess.js'
 import settingsStore from './services/settingsStore.js'
 import { registerServerIpc } from './ipc/server.js'
@@ -18,6 +19,47 @@ import './services/webhookService.js'
 import './services/playerManager.js'
 
 let mainWindow = null
+
+// Configure autoUpdater if app is packaged
+if (app.isPackaged) {
+  autoUpdater.logger = console
+
+  autoUpdater.on('checking-for-update', () => {
+    console.log('Checking for update...')
+  })
+
+  autoUpdater.on('update-available', (info) => {
+    console.log('Update available:', info)
+  })
+
+  autoUpdater.on('update-not-available', (info) => {
+    console.log('Update not available:', info)
+  })
+
+  autoUpdater.on('error', (err) => {
+    console.error('Error in auto-updater:', err)
+  })
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    console.log(`Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent}%`)
+  })
+
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('Update downloaded:', info)
+    dialog.showMessageBox(mainWindow || null, {
+      type: 'question',
+      buttons: ['Restart & Update', 'Later'],
+      defaultId: 0,
+      cancelId: 1,
+      title: 'Update Available',
+      message: 'A new version of Craftly has been downloaded. Would you like to restart and apply the update now?'
+    }).then((result) => {
+      if (result.response === 0) {
+        autoUpdater.quitAndInstall()
+      }
+    })
+  })
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -80,6 +122,11 @@ app.whenReady().then(() => {
   schedulerService.initAllJobs()
 
   createWindow()
+
+  // Check for updates on launch when packaged
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdatesAndNotify()
+  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
