@@ -138,31 +138,17 @@ body {
   padding: var(--space-lg) var(--space-md) var(--space-md);
   border-bottom: 1px solid var(--border-strong);
   display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  position: relative;
-}
-
-.sidebar-logo {
-  width: 32px;
-  height: 32px;
-  background: var(--color-primary-subtle);
-  color: var(--color-primary);
-  border: 1px solid var(--border-accent);
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
   justify-content: center;
-  font-size: var(--font-lg);
-  flex-shrink: 0;
-  box-shadow: var(--shadow-sm);
-  animation: logo-glow 3s infinite ease-in-out;
+  align-items: center;
+  position: relative;
 }
 
 .sidebar-brand {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-sm);
+  text-align: center;
+  gap: var(--space-xs);
 }
 
 .sidebar-title {
@@ -376,16 +362,6 @@ body {
   }
 }
 
-@keyframes logo-glow {
-  0%, 100% {
-    box-shadow: 0 0 6px rgba(147, 51, 234, 0.3);
-    border-color: var(--border-accent);
-  }
-  50% {
-    box-shadow: 0 0 14px rgba(147, 51, 234, 0.7);
-    border-color: var(--color-primary-hover);
-  }
-}
 
 @keyframes retro-blink {
   0%, 100% { opacity: 1; }
@@ -2034,7 +2010,6 @@ body {
   filter: none !important;
 }
 
-.sidebar-logo,
 .sidebar-title,
 .badge-dot.pulse,
 .status-dot.transitional,

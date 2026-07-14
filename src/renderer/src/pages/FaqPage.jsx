@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react'
-import { ChevronDown, ChevronUp, AlertTriangle, ExternalLink, Zap, Sliders, Network, Search, HelpCircle } from 'lucide-react'
+import { ChevronDown, ChevronUp, AlertTriangle, ExternalLink, Zap, Sliders, Network, Search, HelpCircle, Bell, RefreshCw, Shield, FileText, Clock, LifeBuoy } from 'lucide-react'
 
 const categories = [
   { id: 'all', label: 'All Topics' },
+  { id: 'features', label: 'Server Features & Safety' },
   { id: 'playit', label: 'playit.gg (Easiest)' },
   { id: 'portforward', label: 'Port Forwarding' },
   { id: 'other', label: 'Other Methods' }
@@ -203,6 +204,211 @@ function FaqPage() {
                 <strong>Radmin VPN:</strong> A popular, free, Windows-only virtual LAN tool. You set up a private room with a name and password, and players connect to that room. They can then join your server using your virtual Radmin IP address. This bypasses firewalls easily but does not support macOS or Linux players.
               </li>
             </ul>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'discord-notifications',
+      category: 'features',
+      title: 'Setting Up Discord Notifications',
+      icon: Bell,
+      iconColor: 'var(--color-primary-hover)',
+      summary: 'Receive real-time alerts about your server\'s status directly in your Discord server.',
+      content: (
+        <div className="flex flex-col gap-4">
+          <p>
+            Craftly allows you to send automated status notifications (e.g., when the server starts, stops, or experiences a crash) 
+            directly to a Discord channel using webhooks.
+          </p>
+
+          <div style={{ background: 'var(--bg-tertiary)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }} className="flex flex-col gap-2">
+            <h4 style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Step-by-Step Configuration:</h4>
+            <ol className="flex flex-col gap-2" style={{ paddingLeft: '20px', listStyleType: 'decimal' }}>
+              <li>
+                Open Discord and navigate to your **Server Settings** &gt; **Integrations** &gt; **Webhooks**.
+              </li>
+              <li>
+                Click **New Webhook** (or select an existing one) and select the specific text channel where you want notifications to go.
+              </li>
+              <li>
+                Click **Copy Webhook URL** to copy the secure webhook address to your clipboard.
+              </li>
+              <li>
+                Go back to Craftly, open the **Settings** panel, find the **Discord Webhook** input field, and paste the URL.
+              </li>
+              <li>
+                Save the settings. Craftly will now send status updates directly to your Discord server!
+              </li>
+            </ol>
+          </div>
+
+          <div style={{ background: 'var(--color-warning-subtle)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(245, 158, 11, 0.3)' }} className="flex flex-col gap-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-warning-hover)', fontWeight: 600 }}>
+              <AlertTriangle size={18} />
+              <span>Security Warning: Keep it Private</span>
+            </div>
+            <p style={{ fontSize: '14px' }}>
+              Treat your Discord Webhook URL like a password. Anyone who has possession of this URL can send messages to your Discord server as an integration. Never share it with players or post it publicly.
+            </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'auto-restart',
+      category: 'features',
+      title: 'Why did my server restart on its own?',
+      icon: RefreshCw,
+      iconColor: 'var(--color-warning)',
+      summary: 'Understand how Craftly handles unexpected server crashes and automated recovery.',
+      content: (
+        <div className="flex flex-col gap-4">
+          <p>
+            If you notice your Minecraft server booting back up on its own, it is likely due to Craftly\'s built-in 
+            crash auto-restart/recovery mechanism.
+          </p>
+
+          <div style={{ background: 'var(--bg-tertiary)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }} className="flex flex-col gap-2">
+            <h4 style={{ color: 'var(--text-primary)', fontWeight: 600 }}>How Auto-Restart Works:</h4>
+            <ul className="flex flex-col gap-2" style={{ paddingLeft: '20px', listStyleType: 'disc' }}>
+              <li>
+                <strong>Unexpected Shutdowns:</strong> If the Java process or server engine crashes unexpectedly, runs out of memory, or encounters a fatal exception, Craftly detects the sudden drop and triggers an automatic restart to minimize server downtime for players.
+              </li>
+              <li>
+                <strong>Intentional Stops:</strong> The auto-restart feature is smart. If you manually click the <strong>Stop</strong> button on the dashboard or type <code>/stop</code> in the console, Craftly recognizes the clean shutdown and will <em>not</em> restart the server automatically.
+              </li>
+              <li>
+                <strong>Retry Limits:</strong> To prevent infinite crash-loops (which can strain system resources if the server is permanently misconfigured), Craftly enforces retry limits and will stop attempting auto-restarts after a series of consecutive rapid failures.
+              </li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'player-management',
+      category: 'features',
+      title: 'Player Management: Whitelist vs Ops vs Online Mode',
+      icon: Shield,
+      iconColor: 'var(--color-success)',
+      summary: 'Differentiate server security layers and player administrative privileges.',
+      content: (
+        <div className="flex flex-col gap-4">
+          <p>
+            Managing who can connect to your server and what permissions they have is critical for maintaining a secure and fun environment.
+          </p>
+
+          <div style={{ background: 'var(--bg-tertiary)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }} className="flex flex-col gap-2">
+            <h4 style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Key Security & Management Settings:</h4>
+            <ul className="flex flex-col gap-2" style={{ paddingLeft: '20px', listStyleType: 'disc' }}>
+              <li>
+                <strong>Whitelist (Access Control):</strong> A list that strictly controls which players are allowed to connect. When enabled, any user not explicitly added to the whitelist is denied entry. You can easily manage this list in the <strong>Players</strong> tab of Craftly.
+              </li>
+              <li>
+                <strong>Ops (Operators / Admins):</strong> Players granted operator privileges. Ops have access to in-game admin console commands (e.g., <code>/gamemode</code>, <code>/ban</code>, <code>/op</code>). Grant operator privileges only to players you trust completely.
+              </li>
+              <li>
+                <strong>Online Mode (Account Verification):</strong> A setting in <code>server.properties</code>. When enabled (default/recommended), the server verifies connecting players with Mojang/Microsoft authentication servers. Disabling this (<code>online-mode=false</code>) allows "cracked" clients to join, but poses significant security risks as usernames can be easily spoofed and standard skins will not load.
+              </li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'edit-files-safely',
+      category: 'features',
+      title: 'Editing Server Files Safely',
+      icon: FileText,
+      iconColor: 'var(--color-primary-hover)',
+      summary: 'Best practices for editing server config files or world saves to prevent corruption.',
+      content: (
+        <div className="flex flex-col gap-4">
+          <p>
+            Modifying server files directly is often required to configure plugins, adjust properties, or upload custom worlds. 
+            However, doing this incorrectly can corrupt your server files.
+          </p>
+
+          <div style={{ background: 'var(--bg-tertiary)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }} className="flex flex-col gap-2">
+            <h4 style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Best Practices:</h4>
+            <ol className="flex flex-col gap-2" style={{ paddingLeft: '20px', listStyleType: 'decimal' }}>
+              <li>
+                <strong>Stop the Server:</strong> Always click the **Stop** button and wait for the server to be fully offline before modifying files. Active servers continually write data to files, and modifying them concurrently can result in data corruption.
+              </li>
+              <li>
+                <strong>Use the File Manager:</strong> Access your server directory using Craftly\'s built-in **File Manager** to view, edit, or upload configurations.
+              </li>
+              <li>
+                <strong>Create Backups:</strong> Before making major edits or installing new mods/plugins, download a backup copy of your configuration files or world directories.
+              </li>
+              <li>
+                <strong>Start the Server:</strong> Once your edits are saved, boot up the server and monitor the console for any syntax or loading errors.
+              </li>
+            </ol>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'schedule-restarts',
+      category: 'features',
+      title: 'Why should I schedule restarts?',
+      icon: Clock,
+      iconColor: 'var(--color-primary-hover)',
+      summary: 'Keep your server running smoothly by scheduling periodic restarts.',
+      content: (
+        <div className="flex flex-col gap-4">
+          <p>
+            Periodic restarts are one of the simplest and most effective ways to maintain high performance and low latency on a Minecraft server.
+          </p>
+
+          <div style={{ background: 'var(--bg-tertiary)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }} className="flex flex-col gap-2">
+            <h4 style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Why restarting helps:</h4>
+            <ul className="flex flex-col gap-2" style={{ paddingLeft: '20px', listStyleType: 'disc' }}>
+              <li>
+                <strong>Memory Cleanup:</strong> Minecraft servers and their plugins/mods often suffer from minor memory leaks over long uptime periods. Restarts flush the system RAM, freeing up system resources.
+              </li>
+              <li>
+                <strong>Performance Boost:</strong> Periodic restarts clear out stale entities, clean up loaded chunks, and resolve background thread congestion, reducing game lag and ticks-per-second (TPS) drops.
+              </li>
+              <li>
+                <strong>Built-in Warning Sequence:</strong> Craftly can run a scheduled restart sequence, broadcasting alert warnings to active in-game players (e.g. 5-minute, 1-minute warnings) so they have time to safely save items and log out.
+              </li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'get-help',
+      category: 'features',
+      title: 'Getting Help / Sharing a Crash Report',
+      icon: LifeBuoy,
+      iconColor: 'var(--color-danger-hover)',
+      summary: 'How to locate and share server crash logs when seeking community troubleshooting help.',
+      content: (
+        <div className="flex flex-col gap-4">
+          <p>
+            When things go wrong (e.g., a plugin fails, or the server crashes on launch), troubleshooting logs are the most important resource for diagnosing the issue.
+          </p>
+
+          <div style={{ background: 'var(--bg-tertiary)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }} className="flex flex-col gap-2">
+            <h4 style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Steps to Retrieve and Share Logs:</h4>
+            <ol className="flex flex-col gap-2" style={{ paddingLeft: '20px', listStyleType: 'decimal' }}>
+              <li>
+                <strong>Open Log Viewer:</strong> Navigate to the **Log Viewer** tab in Craftly to read live startup and shutdown logs.
+              </li>
+              <li>
+                <strong>Find Crash Reports:</strong> If the server crashed, go to the **File Manager** and open the <code>crash-reports</code> directory. Open the most recent text file (which contains detailed stack traces).
+              </li>
+              <li>
+                <strong>Use Paste Sites:</strong> Do not post screenshots of code or raw logs as they are hard to read. Paste the log content into tools like <strong>mclo.gs</strong>, <strong>Pastebin</strong>, or <strong>GitHub Gist</strong>.
+              </li>
+              <li>
+                <strong>Share the Link:</strong> Provide the paste link when asking for support on Discord or community forums. This helps other administrators instantly identify which plugin or mod caused the crash.
+              </li>
+            </ol>
           </div>
         </div>
       )
