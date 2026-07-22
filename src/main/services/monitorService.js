@@ -8,7 +8,7 @@ import serverProcess from './serverProcess.js'
 
 const execFileAsync = promisify(execFile)
 
-function parseXmxToGB(xmxStr) {
+export function parseXmxToGB(xmxStr) {
   if (!xmxStr) return 4.0;
   const match = xmxStr.match(/^(\d+)([gmGM])$/);
   if (!match) return 4.0;

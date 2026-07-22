@@ -6,8 +6,8 @@ productName: Craftly
 # published and fetched by the auto-updater.
 publish:
   provider: github
-  owner: "PLACEHOLDER_OWNER"
-  repo: "PLACEHOLDER_REPO"
+  owner: "shreyaskini4"
+  repo: "craftly"
 directories:
   buildResources: build
 files:
