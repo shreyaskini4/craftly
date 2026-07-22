@@ -81,12 +81,25 @@ function createWindow() {
       sandbox: false,
       preload: join(__dirname, '../preload/index.js')
     },
-    show: false
+    show: process.env.ELECTRON_RENDERER_URL ? true : false
   })
 
   // Show window when ready to prevent visual flash
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+    if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible()) {
+      mainWindow.show()
+    }
+  })
+
+  // Prompt fallback: Ensure window is shown promptly even if ready-to-show is delayed
+  const showFallbackTimer = setTimeout(() => {
+    if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible()) {
+      mainWindow.show()
+    }
+  }, 300)
+
+  mainWindow.on('show', () => {
+    clearTimeout(showFallbackTimer)
   })
 
   mainWindow.on('closed', () => {
@@ -108,9 +121,15 @@ function createWindow() {
 
   // Load renderer
   if (process.env.ELECTRON_RENDERER_URL) {
-    mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
+    mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL).catch((err) => {
+      console.error('Failed to load ELECTRON_RENDERER_URL:', err)
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show()
+    })
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html')).catch((err) => {
+      console.error('Failed to load renderer index.html:', err)
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show()
+    })
   }
 }
 

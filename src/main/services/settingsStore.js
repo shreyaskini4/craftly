@@ -10,35 +10,41 @@ const Store = ElectronStore.default || ElectronStore
  * Provides centralized configuration management with sensible defaults.
  */
 
-const defaults = {
-  javaPath: 'java',
-  serverJavaPaths: {},
-  xmx: '4G',
-  xms: '2G',
-  serverDir: join(app.getPath('userData'), 'server'),
-  backupsDir: join(app.getPath('userData'), 'backups'),
-  serverType: 'vanilla',
-  serverVersion: '',
-  serverBuild: '',
-  rconEnabled: true,
-  rconPort: 25575,
-  rconPassword: 'changeme',
-  autoBackupEnabled: false,
-  autoBackupInterval: 6,
-  installedMods: [],
-  onboardingComplete: false,
-  serverJar: '',
-  autoRestartOnCrash: true,
-  autoRestartMaxRetries: 5,
-  discordWebhookUrl: '',
-  discordWebhookEvents: { start: true, stop: true, crash: true, backup: true },
-  scheduledJobs: []
-}
+let store = null
 
-const store = new Store({
-  name: 'settings',
-  defaults
-})
+function getStore() {
+  if (!store) {
+    const defaults = {
+      javaPath: 'java',
+      serverJavaPaths: {},
+      xmx: '4G',
+      xms: '2G',
+      serverDir: join(app.getPath('userData'), 'server'),
+      backupsDir: join(app.getPath('userData'), 'backups'),
+      serverType: 'vanilla',
+      serverVersion: '',
+      serverBuild: '',
+      rconEnabled: true,
+      rconPort: 25575,
+      rconPassword: 'changeme',
+      autoBackupEnabled: false,
+      autoBackupInterval: 6,
+      installedMods: [],
+      onboardingComplete: false,
+      serverJar: '',
+      autoRestartOnCrash: true,
+      autoRestartMaxRetries: 5,
+      discordWebhookUrl: '',
+      discordWebhookEvents: { start: true, stop: true, crash: true, backup: true },
+      scheduledJobs: []
+    }
+    store = new Store({
+      name: 'settings',
+      defaults
+    })
+  }
+  return store
+}
 
 /**
  * Get a single setting value.
@@ -46,7 +52,7 @@ const store = new Store({
  * @returns {*} The setting value
  */
 export function get(key) {
-  return store.get(key)
+  return getStore().get(key)
 }
 
 /**
@@ -55,7 +61,7 @@ export function get(key) {
  * @param {*} value - The value to set
  */
 export function set(key, value) {
-  store.set(key, value)
+  getStore().set(key, value)
 }
 
 /**
@@ -63,14 +69,14 @@ export function set(key, value) {
  * @returns {object} All settings
  */
 export function getAll() {
-  return store.store
+  return getStore().store
 }
 
 /**
  * Reset all settings to defaults.
  */
 export function reset() {
-  store.clear()
+  getStore().clear()
 }
 
 /**
@@ -78,8 +84,8 @@ export function reset() {
  * Creates them recursively if they don't exist.
  */
 export async function ensureDirectories() {
-  const serverDir = store.get('serverDir')
-  const backupsDir = store.get('backupsDir')
+  const serverDir = getStore().get('serverDir')
+  const backupsDir = getStore().get('backupsDir')
 
   try {
     await mkdir(serverDir, { recursive: true })
