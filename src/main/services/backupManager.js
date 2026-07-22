@@ -11,7 +11,7 @@ class BackupManager extends EventEmitter {
     this.autoBackupTimer = null
   }
 
-  async createBackup(serverDir, backupsDir) {
+  async createBackup(serverDir, backupsDir, prefix = 'backup') {
     fs.mkdirSync(backupsDir, { recursive: true })
 
     // Determine world folder name from server.properties
@@ -48,7 +48,7 @@ class BackupManager extends EventEmitter {
 
     const now = new Date()
     const timestamp = now.toISOString().replace(/[:.]/g, '-').replace('T', '-').slice(0, 19)
-    const backupName = `backup-${timestamp}.zip`
+    const backupName = `${prefix}-${timestamp}.zip`
     const backupPath = path.join(backupsDir, backupName)
 
     return new Promise((resolve, reject) => {

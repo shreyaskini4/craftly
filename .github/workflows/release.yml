@@ -1,0 +1,96 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Release (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build renderer & main process
+        run: npm run build
+
+      # =========================================================================
+      # CODE SIGNING & NOTARIZATION CONFIGURATION PLACEHOLDERS
+      # =========================================================================
+      # 
+      # --- WINDOWS CODE SIGNING ---
+      # 1. SignPath (Preferred for open-source / cloud signing):
+      #    To use SignPath, add the following secrets to GitHub Repository Settings -> Secrets and variables -> Actions:
+      #      - SIGNPATH_API_TOKEN
+      #      - SIGNPATH_ORGANIZATION_ID
+      #      - SIGNPATH_PROJECT_SLUG
+      #      - SIGNPATH_SIGNING_POLICY_SLUG
+      #    And pass them in env for Windows step:
+      #      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+      #      SIGNPATH_ORGANIZATION_ID: ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
+      #      SIGNPATH_PROJECT_SLUG: ${{ secrets.SIGNPATH_PROJECT_SLUG }}
+      #      SIGNPATH_SIGNING_POLICY_SLUG: ${{ secrets.SIGNPATH_SIGNING_POLICY_SLUG }}
+      #
+      # 2. Azure Trusted Signing:
+      #    Secrets:
+      #      - AZURE_TENANT_ID
+      #      - AZURE_CLIENT_ID
+      #      - AZURE_CLIENT_SECRET
+      #      - AZURE_CODE_SIGNING_ACCOUNT_NAME
+      #      - AZURE_CERTIFICATE_PROFILE_NAME
+      #
+      # 3. Traditional Windows PFX Certificate:
+      #    Secrets:
+      #      - CSC_LINK (base64-encoded .pfx certificate string or URL)
+      #      - CSC_KEY_PASSWORD (password for the certificate)
+      #
+      # --- MACOS CODE SIGNING & NOTARIZATION ---
+      # 1. Developer ID Application Certificate:
+      #    Secrets:
+      #      - CSC_LINK (base64-encoded .p12 Developer ID certificate)
+      #      - CSC_KEY_PASSWORD (certificate password)
+      #
+      # 2. Apple Notarization:
+      #    Secrets:
+      #      - APPLE_ID (your Apple Developer ID email)
+      #      - APPLE_APP_SPECIFIC_PASSWORD (App-Specific Password generated at appleid.apple.com)
+      #      - APPLE_TEAM_ID (10-character Team ID)
+      #    OR App Store Connect API Key:
+      #      - APPLE_API_KEY (Base64 encoded .p8 Auth Key)
+      #      - APPLE_API_KEY_ID (Key ID)
+      #      - APPLE_API_ISSUER (Issuer ID)
+      # =========================================================================
+
+      - name: Build & Publish Desktop App
+        run: npx electron-builder --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Uncomment and configure code signing environment variables as needed:
+          # CSC_LINK: ${{ secrets.CSC_LINK }}
+          # CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          # SIGNPATH_ORGANIZATION_ID: ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
+          # SIGNPATH_PROJECT_SLUG: ${{ secrets.SIGNPATH_PROJECT_SLUG }}
+          # SIGNPATH_SIGNING_POLICY_SLUG: ${{ secrets.SIGNPATH_SIGNING_POLICY_SLUG }}

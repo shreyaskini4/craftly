@@ -22,6 +22,13 @@ export function registerBackupsIpc(mainWindow) {
       throw new Error('Cannot restore backup while the server is running. Please stop the server first.')
     }
     const settings = settingsStore.getAll()
+
+    try {
+      await backupManager.createBackup(settings.serverDir, settings.backupsDir, 'pre-restore-safety')
+    } catch (err) {
+      console.warn('Failed to create pre-restore safety backup:', err)
+    }
+
     await backupManager.restoreBackup(backupPath, settings.serverDir)
   })
 

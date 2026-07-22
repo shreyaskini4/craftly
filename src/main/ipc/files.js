@@ -6,7 +6,7 @@ import settingsStore from '../services/settingsStore.js'
 /**
  * Helper to prevent directory traversal and resolve safe absolute path.
  */
-function safePath(relativePath) {
+export function safePath(relativePath) {
   const serverDir = settingsStore.get('serverDir')
   if (!serverDir) {
     throw new Error('Server directory is not configured')
@@ -18,7 +18,10 @@ function safePath(relativePath) {
   const normServerDir = absoluteServerDir.toLowerCase()
   const normPath = absolutePath.toLowerCase()
 
-  if (!normPath.startsWith(normServerDir)) {
+  const isExactMatch = normPath === normServerDir
+  const isSubPath = normPath.startsWith(normServerDir + path.sep)
+
+  if (!isExactMatch && !isSubPath) {
     throw new Error('Access Denied: Path traversal detected')
   }
 
