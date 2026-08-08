@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Search, Download, Trash2, Package, Check, Loader, RefreshCw, ArrowUpCircle } from 'lucide-react'
+import { Search, Download, Trash2, Package, Check, Loader, RefreshCw, ArrowUpCircle, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import useModStore from '../stores/modStore'
 
@@ -25,6 +25,7 @@ function ModsPage() {
   const [gameVersion, setGameVersion] = useState('')
   const [loader, setLoader] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [importing, setImporting] = useState(false)
 
   useEffect(() => {
     loadInstalled()
@@ -74,6 +75,43 @@ function ModsPage() {
     }
   }
 
+  const handleImportMrpack = async () => {
+    setImporting(true)
+    const toastId = 'import-mrpack-toast'
+
+    const progressHandler = (progress) => {
+      if (progress) {
+        const percent = progress.percent !== undefined ? progress.percent : 0
+        const name = progress.name ? ` (${progress.name})` : ''
+        toast.loading(`Importing modpack: ${percent}%${name}`, { id: toastId })
+      }
+    }
+
+    const handler = window.api.on?.downloadProgress
+      ? window.api.on.downloadProgress(progressHandler)
+      : null
+
+    try {
+      const result = await window.api.mods.importMrpack()
+      if (result) {
+        await loadInstalled()
+        toast.success(`Installed ${result.totalInstalled} mods from ${result.name}`, { id: toastId })
+        if (result.warning) {
+          toast.warning(result.warning)
+        }
+      } else {
+        toast.dismiss(toastId)
+      }
+    } catch (err) {
+      toast.error(`Failed to import modpack: ${err.message || err}`, { id: toastId })
+    } finally {
+      setImporting(false)
+      if (handler && window.api.removeListener?.downloadProgress) {
+        window.api.removeListener.downloadProgress(handler)
+      }
+    }
+  }
+
   const handleLoadMore = () => {
     search(query, true)
   }
@@ -84,10 +122,23 @@ function ModsPage() {
 
   return (
     <div className="slide-up">
-      <div className="page-header">
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 className="page-title">Mods</h1>
           <p className="page-subtitle">Browse and manage Modrinth mods</p>
+        </div>
+        <div className="flex gap-sm" style={{ alignItems: 'center' }}>
+          <button
+            className="btn btn-outline btn-premium"
+            onClick={handleImportMrpack}
+            disabled={importing}
+          >
+            {importing ? (
+              <><Loader size={16} className="spin" /> Importing...</>
+            ) : (
+              <><Upload size={16} /> Import .mrpack</>
+            )}
+          </button>
         </div>
       </div>
 

@@ -2,10 +2,14 @@ import { ipcMain, shell } from 'electron'
 import backupManager from '../services/backupManager.js'
 import serverProcess from '../services/serverProcess.js'
 import settingsStore from '../services/settingsStore.js'
+import { checkFreeSpace } from '../utils/diskSpace.js'
 
 export function registerBackupsIpc(mainWindow) {
   ipcMain.handle('backups:create', async () => {
     const settings = settingsStore.getAll()
+
+    // Ensure at least 1 GB free space is available before creating backup
+    await checkFreeSpace(settings.backupsDir, 1024 * 1024 * 1024)
 
     backupManager.removeAllListeners('progress')
     backupManager.on('progress', (progress) => {
@@ -24,6 +28,7 @@ export function registerBackupsIpc(mainWindow) {
     const settings = settingsStore.getAll()
 
     try {
+      await checkFreeSpace(settings.backupsDir, 1024 * 1024 * 1024)
       await backupManager.createBackup(settings.serverDir, settings.backupsDir, 'pre-restore-safety')
     } catch (err) {
       console.warn('Failed to create pre-restore safety backup:', err)

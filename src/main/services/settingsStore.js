@@ -14,13 +14,14 @@ let store = null
 
 function getStore() {
   if (!store) {
+    const userDataDir = app?.getPath ? app.getPath('userData') : process.cwd()
     const defaults = {
       javaPath: 'java',
       serverJavaPaths: {},
       xmx: '4G',
       xms: '2G',
-      serverDir: join(app.getPath('userData'), 'server'),
-      backupsDir: join(app.getPath('userData'), 'backups'),
+      serverDir: join(userDataDir, 'server'),
+      backupsDir: join(userDataDir, 'backups'),
       serverType: 'vanilla',
       serverVersion: '',
       serverBuild: '',

@@ -1,5 +1,6 @@
-import { ipcMain } from 'electron'
+import { ipcMain, dialog } from 'electron'
 import * as modrinthApi from '../services/modrinthApi.js'
+import * as modpackManager from '../services/modpackManager.js'
 import settingsStore from '../services/settingsStore.js'
 import path from 'path'
 
@@ -131,4 +132,28 @@ export function registerModsIpc(mainWindow) {
     }
     return updates
   })
+
+  ipcMain.handle('mods:import-mrpack', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: 'Select Modrinth Modpack',
+      properties: ['openFile'],
+      filters: [{ name: 'Modrinth Modpack', extensions: ['mrpack'] }]
+    })
+
+    if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
+      return null
+    }
+
+    const filePath = result.filePaths[0]
+    const settings = settingsStore.getAll()
+
+    const onProgress = (progress) => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('download:progress', progress)
+      }
+    }
+
+    return await modpackManager.importMrpack(filePath, settings.serverDir, onProgress)
+  })
 }
+

@@ -28,7 +28,8 @@ contextBridge.exposeInMainWorld('api', {
     install: (projectId, versionId) => ipcRenderer.invoke('mods:install', projectId, versionId),
     uninstall: (filename) => ipcRenderer.invoke('mods:uninstall', filename),
     getInstalled: () => ipcRenderer.invoke('mods:installed'),
-    checkUpdates: () => ipcRenderer.invoke('mods:check-updates')
+    checkUpdates: () => ipcRenderer.invoke('mods:check-updates'),
+    importMrpack: () => ipcRenderer.invoke('mods:import-mrpack')
   },
 
   // ─── Backup Management ────────────────────────────────────────────
@@ -206,7 +207,8 @@ contextBridge.exposeInMainWorld('api', {
     listLogs: () => ipcRenderer.invoke('logs:list-logs'),
     listCrashReports: () => ipcRenderer.invoke('logs:list-crash-reports'),
     readLog: (filename) => ipcRenderer.invoke('logs:read-log', filename),
-    readCrashReport: (filename) => ipcRenderer.invoke('logs:read-crash-report', filename)
+    readCrashReport: (filename) => ipcRenderer.invoke('logs:read-crash-report', filename),
+    logUiError: (data) => ipcRenderer.invoke('logs:log-ui-error', data)
   },
 
   // ─── Window Controls ──────────────────────────────────────────────

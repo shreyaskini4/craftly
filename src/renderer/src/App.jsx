@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Toaster } from 'sonner'
 import Sidebar from './components/layout/Sidebar'
+import ErrorBoundary from './components/common/ErrorBoundary'
 import DashboardPage from './pages/DashboardPage'
 import ConsolePage from './pages/ConsolePage'
 import ModsPage from './pages/ModsPage'
@@ -49,7 +50,9 @@ function App() {
   if (!settings.onboardingComplete) {
     return (
       <div className="app-layout" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <WelcomePage onComplete={() => setSettings(prev => ({ ...prev, onboardingComplete: true }))} />
+        <ErrorBoundary onReset={() => window.location.reload()}>
+          <WelcomePage onComplete={() => setSettings(prev => ({ ...prev, onboardingComplete: true }))} />
+        </ErrorBoundary>
         <Toaster theme="dark" position="bottom-right" richColors closeButton />
       </div>
     )
@@ -59,7 +62,9 @@ function App() {
     <div className="app-layout">
       <Sidebar activePage={activePage} onNavigate={setActivePage} />
       <main className="main-content">
-        {renderPage()}
+        <ErrorBoundary key={activePage} onReset={() => setActivePage('dashboard')}>
+          {renderPage()}
+        </ErrorBoundary>
       </main>
       <Toaster theme="dark" position="bottom-right" richColors closeButton />
     </div>

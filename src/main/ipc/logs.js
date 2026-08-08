@@ -120,4 +120,34 @@ export function registerLogsIpc(mainWindow) {
     }
     return fs.readFileSync(filePath, 'utf-8')
   })
+
+  ipcMain.handle('logs:log-ui-error', async (_event, errorData) => {
+    try {
+      const serverDir = settingsStore.get('serverDir')
+      if (!serverDir) return false
+      const crashDir = path.join(serverDir, 'crash-reports')
+      if (!fs.existsSync(crashDir)) {
+        fs.mkdirSync(crashDir, { recursive: true })
+      }
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      const filename = `ui-error-${timestamp}.txt`
+      const filePath = path.join(crashDir, filename)
+      const report = `---- Craftly UI Render Crash Report ----
+Timestamp: ${new Date().toISOString()}
+Error: ${errorData.message || 'Unknown Error'}
+
+Stack Trace:
+${errorData.stack || 'No stack trace available'}
+
+Component Stack:
+${errorData.componentStack || 'No component stack available'}
+`
+      fs.writeFileSync(filePath, report, 'utf-8')
+      console.error(`[UI Crash] Saved error report to ${filePath}`)
+      return filename
+    } catch (err) {
+      console.error('Failed to log UI error:', err)
+      return false
+    }
+  })
 }

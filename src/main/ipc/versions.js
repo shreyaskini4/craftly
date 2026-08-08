@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron'
 import * as versionManager from '../services/versionManager.js'
 import settingsStore from '../services/settingsStore.js'
+import { checkFreeSpace } from '../utils/diskSpace.js'
 
 export function registerVersionsIpc(mainWindow) {
   ipcMain.handle('versions:fetch-vanilla', async () => {
@@ -25,6 +26,9 @@ export function registerVersionsIpc(mainWindow) {
 
   ipcMain.handle('versions:download', async (_event, type, version, build) => {
     const serverDir = settingsStore.get('serverDir')
+
+    // Ensure at least 500 MB free space before downloading
+    await checkFreeSpace(serverDir, 500 * 1024 * 1024)
 
     const onProgress = (progress) => {
       if (mainWindow && !mainWindow.isDestroyed()) {
