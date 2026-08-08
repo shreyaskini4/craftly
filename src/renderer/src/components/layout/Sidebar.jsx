@@ -15,14 +15,31 @@ const navItems = [
   { id: 'faq', label: 'Help / FAQ', icon: HelpCircle }
 ]
 
+function getStatusClass(status) {
+  if (status === 'starting' || status === 'stopping') return 'transitional'
+  if (status === 'crashed') return 'crashed'
+  return status
+}
+
+function getStatusLabel(status) {
+  switch (status) {
+    case 'online': return 'Online'
+    case 'starting': return 'Starting'
+    case 'stopping': return 'Stopping'
+    case 'crashed': return 'Crashed'
+    default: return 'Offline'
+  }
+}
+
 function Sidebar({ activePage, onNavigate }) {
   const status = useServerStore(state => state.status)
   const isOnline = status === 'online'
   const isTransitional = status === 'starting' || status === 'stopping'
   const isCrashed = status === 'crashed'
+  const statusClass = getStatusClass(status)
 
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" role="navigation" aria-label="Main navigation">
       <div className="sidebar-header">
         <div className="titlebar-drag" />
         <div className="sidebar-brand">
@@ -31,16 +48,19 @@ function Sidebar({ activePage, onNavigate }) {
         </div>
       </div>
 
-      <nav className="sidebar-nav">
+      <nav className="sidebar-nav" aria-label="Page navigation">
         {navItems.map(item => {
           const Icon = item.icon
+          const isActive = activePage === item.id
           return (
             <button
               key={item.id}
-              className={`sidebar-item ${activePage === item.id ? 'active' : ''}`}
+              className={`sidebar-item ${isActive ? 'active' : ''}`}
               onClick={() => onNavigate(item.id)}
+              aria-current={isActive ? 'page' : undefined}
+              aria-label={`Navigate to ${item.label}`}
             >
-              <Icon size={20} className="icon" />
+              <Icon className="icon" />
               <span className="label text-pixel">{item.label}</span>
             </button>
           )
@@ -48,23 +68,12 @@ function Sidebar({ activePage, onNavigate }) {
         <div style={{ flex: 1 }} />
       </nav>
 
-      <div className={`sidebar-status ${
-        status === 'starting' || status === 'stopping' ? 'transitional' :
-        status === 'crashed' ? 'crashed' :
-        status
-      }`}>
+      <div className={`sidebar-status ${statusClass}`} role="status" aria-live="polite" aria-label={`Server status: ${getStatusLabel(status)}`}>
         <div className={`status-dot ${isOnline ? 'online' : ''} ${isTransitional ? 'transitional' : ''} ${isCrashed ? 'crashed' : ''}`} />
         <div className="status-text">
           <span className="status-label text-pixel">Server Status</span>
-          <span className={`status-value text-pixel ${
-            status === 'starting' || status === 'stopping' ? 'transitional' :
-            status === 'crashed' ? 'crashed' :
-            status
-          }`}>
-            {status === 'online' ? 'Online' :
-             status === 'starting' ? 'Starting' :
-             status === 'stopping' ? 'Stopping' :
-             status === 'crashed' ? 'Crashed' : 'Offline'}
+          <span className={`status-value text-pixel ${statusClass}`}>
+            {getStatusLabel(status)}
           </span>
         </div>
       </div>
@@ -73,3 +82,4 @@ function Sidebar({ activePage, onNavigate }) {
 }
 
 export default Sidebar
+

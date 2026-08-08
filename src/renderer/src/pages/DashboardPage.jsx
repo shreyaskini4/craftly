@@ -274,9 +274,9 @@ function DashboardPage({ onNavigate }) {
 
       {crashInfo && (
         <div style={{
-          background: crashInfo.fatal ? 'rgba(244, 63, 94, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-          color: crashInfo.fatal ? '#f43f5e' : '#f59e0b',
-          border: `1px solid ${crashInfo.fatal ? 'rgba(244, 63, 94, 0.4)' : 'rgba(245, 158, 11, 0.4)'}`,
+          background: crashInfo.fatal ? 'var(--color-danger-subtle)' : 'var(--color-warning-subtle)',
+          color: crashInfo.fatal ? 'var(--color-danger)' : 'var(--color-warning)',
+          border: `1px solid ${crashInfo.fatal ? 'var(--color-danger-glow)' : 'var(--color-warning-glow)'}`,
           padding: '16px 20px',
           borderRadius: 'var(--radius-md)',
           marginBottom: 'var(--space-lg)',
@@ -284,10 +284,10 @@ function DashboardPage({ onNavigate }) {
           justifyContent: 'space-between',
           alignItems: 'center',
           gap: 'var(--space-md)',
-          boxShadow: crashInfo.fatal ? '0 0 15px rgba(244, 63, 94, 0.15)' : '0 0 15px rgba(245, 158, 11, 0.15)'
+          boxShadow: crashInfo.fatal ? '0 0 15px var(--color-danger-glow)' : '0 0 15px var(--color-warning-glow)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '24px' }}>{crashInfo.fatal ? '🚨' : '⚠️'}</span>
+            <span style={{ fontSize: '24px' }} role="img" aria-label={crashInfo.fatal ? 'Fatal error' : 'Warning'}>{crashInfo.fatal ? '🚨' : '⚠️'}</span>
             <div>
               <h4 style={{ margin: 0, fontWeight: 700, fontSize: '16px' }}>
                 {crashInfo.fatal ? 'Fatal Server Crash' : 'Server Crashed!'}
@@ -304,6 +304,7 @@ function DashboardPage({ onNavigate }) {
             <button
               className="btn btn-danger no-drag"
               onClick={handleStart}
+              aria-label="Start server after fatal crash"
               style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}
             >
               <Play size={16} /> Start Server
@@ -370,7 +371,7 @@ function DashboardPage({ onNavigate }) {
               </div>
             ) : (
               <>
-                <div className="card-value text-pixel" style={{ color: tpsColor, textShadow: tpsValue !== null ? (tpsValue >= 18 ? '0 0 6px rgba(16, 185, 129, 0.8), 0 0 15px rgba(16, 185, 129, 0.4)' : tpsValue >= 15 ? '0 0 6px rgba(245, 158, 11, 0.8), 0 0 15px rgba(245, 158, 11, 0.4)' : '0 0 6px rgba(244, 63, 94, 0.8), 0 0 15px rgba(244, 63, 94, 0.4)') : 'none' }}>
+                <div className="card-value text-pixel" style={{ color: tpsColor, textShadow: tpsValue !== null ? (tpsValue >= 18 ? '0 0 6px var(--color-success-glow), 0 0 15px var(--color-success-subtle)' : tpsValue >= 15 ? '0 0 6px var(--color-warning-glow), 0 0 15px var(--color-warning-subtle)' : '0 0 6px var(--color-danger-glow), 0 0 15px var(--color-danger-subtle)') : 'none' }}>
                   {tpsValue !== null ? tpsValue.toFixed(1) : 'N/A'}
                 </div>
                 <p className="card-subtitle">

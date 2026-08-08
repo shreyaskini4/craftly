@@ -282,19 +282,19 @@ function ConsolePage() {
         {/* Input bar with floating autocomplete dropdown */}
         <div style={{ position: 'relative', width: '100%' }}>
           {showSuggestions && suggestions.length > 0 && isOnline && (
-            <div style={{
+            <div role="listbox" aria-label="Command suggestions" id="console-autocomplete-list" style={{
               position: 'absolute',
               bottom: 'calc(100% + 8px)',
               left: 0,
               right: 0,
-              background: 'var(--bg-elevated, #16161a)',
-              border: '1px solid rgba(168, 85, 247, 0.35)',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-accent)',
               borderRadius: '10px',
               maxHeight: '220px',
               overflowY: 'auto',
               zIndex: 100,
-              boxShadow: '0 -8px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(168, 85, 247, 0.15)',
-              backdropFilter: 'blur(12px)',
+              boxShadow: 'var(--shadow-lg), 0 0 16px var(--color-primary-subtle)',
+              backdropFilter: 'var(--blur-md)',
               padding: '6px'
             }}>
               <div style={{
@@ -311,7 +311,7 @@ function ConsolePage() {
                   <TerminalIcon size={12} style={{ color: 'var(--accent, #a855f7)' }} />
                   Command Suggestions
                 </span>
-                <span style={{ fontSize: '10px', background: 'rgba(255, 255, 255, 0.06)', padding: '2px 6px', borderRadius: '4px' }}>
+                <span style={{ fontSize: '10px', background: 'var(--border-subtle)', padding: '2px 6px', borderRadius: '4px' }}>
                   Tab or Enter to select
                 </span>
               </div>
@@ -321,6 +321,9 @@ function ConsolePage() {
                 return (
                   <div
                     key={item.cmd}
+                    role="option"
+                    id={`suggestion-${item.cmd}`}
+                    aria-selected={isSelected}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -328,9 +331,9 @@ function ConsolePage() {
                       padding: '7px 10px',
                       borderRadius: '6px',
                       cursor: 'pointer',
-                      background: isSelected ? 'rgba(168, 85, 247, 0.18)' : 'transparent',
-                      border: isSelected ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid transparent',
-                      transition: 'all 0.15s ease',
+                      background: isSelected ? 'var(--color-primary-subtle)' : 'transparent',
+                      border: isSelected ? '1px solid var(--border-accent)' : '1px solid transparent',
+                      transition: 'all var(--transition-fast)',
                       gap: '12px'
                     }}
                     onMouseEnter={() => setSelectedSuggestionIndex(idx)}
@@ -390,6 +393,11 @@ function ConsolePage() {
             <input
               ref={inputRef}
               type="text"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={showSuggestions && suggestions.length > 0}
+              aria-controls="console-autocomplete-list"
+              aria-activedescendant={showSuggestions && suggestions.length > 0 ? `suggestion-${suggestions[selectedSuggestionIndex]?.cmd}` : undefined}
               placeholder={isOnline ? 'Type a command (e.g. op, whitelist, gamemode) and press Enter...' : 'Server is offline'}
               value={command}
               onChange={e => setCommand(e.target.value)}

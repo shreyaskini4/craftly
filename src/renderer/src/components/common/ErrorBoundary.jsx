@@ -71,8 +71,8 @@ class ErrorBoundary extends React.Component {
         }}>
           <div style={{
             background: 'var(--bg-elevated, #16161a)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(239, 68, 68, 0.15)',
+            border: '1px solid var(--color-danger-glow)',
+            boxShadow: 'var(--shadow-lg), 0 0 20px var(--color-danger-subtle)',
             borderRadius: '16px',
             maxWidth: '640px',
             width: '100%',
@@ -86,12 +86,12 @@ class ErrorBoundary extends React.Component {
               width: '64px',
               height: '64px',
               borderRadius: '50%',
-              background: 'rgba(239, 68, 68, 0.15)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
+              background: 'var(--color-danger-subtle)',
+              border: '1px solid var(--color-danger-glow)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#ef4444'
+              color: 'var(--color-danger)'
             }}>
               <AlertTriangle size={32} />
             </div>
@@ -124,7 +124,7 @@ class ErrorBoundary extends React.Component {
                 borderRadius: '8px',
                 padding: '12px 16px',
                 fontSize: '13px',
-                color: '#f87171',
+                color: 'var(--color-danger-hover)',
                 fontFamily: 'var(--font-mono, monospace)',
                 wordBreak: 'break-word',
                 textAlign: 'left'
@@ -188,13 +188,13 @@ class ErrorBoundary extends React.Component {
                 width: '100%',
                 maxHeight: '220px',
                 overflowY: 'auto',
-                background: '#090a0f',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
+                background: 'var(--bg-app)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '8px',
                 padding: '14px',
                 fontSize: '11px',
                 fontFamily: 'var(--font-mono, monospace)',
-                color: '#94a3b8',
+                color: 'var(--text-secondary)',
                 textAlign: 'left',
                 whiteSpace: 'pre-wrap',
                 lineHeight: 1.4
